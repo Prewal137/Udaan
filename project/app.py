@@ -81,15 +81,26 @@ def extract_text_hybrid(pdf_path):
     return text
 
 def text_to_pdf(text, output_pdf, font_path, font_size=12):
+    print("Registering font:", font_path)  # Debug
     pdfmetrics.registerFont(TTFont("CustomFont", font_path))
     c = canvas.Canvas(output_pdf, pagesize=A4)
     width, height = A4
-    textobject = c.beginText(50, height - 50)
+    left_margin = 50
+    top_margin = height - 50
+    bottom_margin = 50
+    line_height = font_size + 4  # Add a little spacing
+
+    textobject = c.beginText(left_margin, top_margin)
     textobject.setFont("CustomFont", font_size)
+
     for line in text.split("\n"):
+        if textobject.getY() < bottom_margin:
+            c.drawText(textobject)
+            c.showPage()
+            textobject = c.beginText(left_margin, top_margin)
+            textobject.setFont("CustomFont", font_size)
         textobject.textLine(line)
     c.drawText(textobject)
-    c.showPage()
     c.save()
 
 # Translation 
@@ -544,7 +555,7 @@ def translate_text():
         pdf_reader = PdfReader(open(filepath, "rb"))
         for page in pdf_reader.pages:
             page_text = page.extract_text()
-            if page_text:  # only add if not None
+            if page_text:
                 text += page_text
     except Exception as e:
         flash(f"Error reading PDF: {str(e)}")
@@ -570,13 +581,11 @@ def translate_text():
         flash("⚠️ Still no readable text found after OCR.")
         return redirect(url_for("student_dashboard"))
 
-    # --- Step 3: Prepare output files ---
+    # --- Step 3: Prepare output file ---
     os.makedirs("static/translations", exist_ok=True)
     base = os.path.splitext(filename)[0]
     hindi_file = f"{base}_hindi.pdf"
-    kannada_file = f"{base}_kannada.pdf"
     hindi_path = os.path.join("static/translations", hindi_file)
-    kannada_path = os.path.join("static/translations", kannada_file)
 
     # --- Step 4: Translation with Gemini ---
     try:
@@ -588,29 +597,29 @@ def translate_text():
         print("Gemini Hindi response:", response_hi.text)  # DEBUG
         hindi_text = response_hi.text if response_hi and response_hi.text else text
 
-        # Translate to Kannada
-        prompt_kn = f"Translate the following English educational text into Kannada, keep it clear and natural:\n\n{text}"
-        response_kn = model.generate_content(prompt_kn)
-        print("Gemini Kannada response:", response_kn.text)  # DEBUG
-        kannada_text = response_kn.text if response_kn and response_kn.text else text
+        # --- Clean up Gemini output ---
+        def clean_text(t):
+            t = re.sub(r"```(?:\w+)?", "", t)  # Remove markdown code blocks
+            t = t.replace("```", "")
+            t = t.strip()
+            return t
 
-        # --- Step 5: Save PDFs with proper fonts ---
-        text_to_pdf(
-            hindi_text,
-            hindi_path,
-            font_path=r"NotoSansDevanagari-Regular.ttf"
-        )
-        text_to_pdf(
-            kannada_text,
-            kannada_path,
-            font_path=r"C:\prewal\NotoSansKannada-Regular.ttf"
-        )
+        hindi_text = clean_text(hindi_text)
+
+        # --- Step 5: Save PDF with proper font ---
+        hindi_font_path = os.path.join(os.path.dirname(__file__), "NotoSansDevanagari-Regular.ttf")
+
+        if not os.path.exists(hindi_font_path):
+            flash("Hindi font file not found. Please add NotoSansDevanagari-Regular.ttf to your project folder.")
+            return redirect(url_for("student_dashboard"))
+
+        text_to_pdf(hindi_text, hindi_path, hindi_font_path)
 
     except Exception as e:
         flash(f"Error during translation: {str(e)}")
         return redirect(url_for("student_dashboard"))
 
-    flash("✅ Translations ready for download!")
+    flash("✅ Hindi translation ready for download!")
 
     # --- Step 6: Refresh uploads list for dashboard ---
     user = session.get("user")
@@ -624,8 +633,7 @@ def translate_text():
         "student_dashboard.html",
         name=user.get("name"),
         uploads=uploads,
-        hindi_file=hindi_file,
-        kannada_file=kannada_file
+        hindi_file=hindi_file
     )
 
 @app.route("/dyslexic_friendly", methods=["POST"])

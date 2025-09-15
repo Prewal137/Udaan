@@ -217,11 +217,10 @@
     {% endif %}
 
     <!-- Download Translations -->
-    {% if hindi_file and kannada_file %}
+    {% if hindi_file %}
       <div class="translations">
-        📘 Download Translations: 
-        <a href="{{ url_for('static', filename='translations/' ~ hindi_file) }}" target="_blank">Hindi</a>
-        
+        <h3>Download Translation:</h3>
+        <a href="{{ url_for('static', filename='translations/' ~ hindi_file) }}" download>Download Hindi PDF</a>
       </div>
     {% endif %}
   </div>
