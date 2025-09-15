@@ -1,0 +1,229 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Student Dashboard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: linear-gradient(135deg, #e0f7fa, #f1f8ff);
+      color: #333;
+    }
+
+    header {
+      background: #0d6efd;
+      color: white;
+      padding: 18px 30px;
+      font-size: 1.5rem;
+      font-weight: bold;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+
+    header a {
+      color: #fff;
+      text-decoration: none;
+      font-size: 1rem;
+      font-weight: 500;
+    }
+    header a:hover { text-decoration: underline; }
+
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+
+    .upload-box {
+      border: 2px dashed #0d6efd;
+      padding: 30px;
+      border-radius: 14px;
+      text-align: center;
+      background: #fff;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    }
+
+    .upload-box input[type="file"] {
+      margin-bottom: 12px;
+    }
+
+    .upload-box button {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #4facfe, #00f2fe);
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .upload-box button:hover {
+      opacity: 0.9;
+      transform: translateY(-2px);
+    }
+
+    .actions-container {
+      margin-top: 40px;
+      padding: 25px;
+      border-radius: 14px;
+      background: #fff;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    }
+
+    .actions {
+      display: flex;
+      justify-content: center;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+
+    .actions form,
+    .actions a {
+      flex: 1 1 200px;
+      max-width: 220px;
+      text-align: center;
+    }
+
+    .actions button {
+      width: 100%;
+      padding: 14px 0;
+      font-size: 1rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      background: #0d6efd;
+      color: white;
+      transition: all 0.25s ease;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .actions button:hover {
+      background: #0b5ed7;
+      transform: translateY(-2px);
+    }
+
+    .audio-player {
+      margin: 40px auto;
+      padding: 20px;
+      max-width: 700px;
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+      text-align: center;
+    }
+
+    .summary-box {
+      margin: 40px auto;
+      padding: 25px;
+      max-width: 800px;
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    }
+    .summary-box h3 {
+      margin-top: 0;
+      color: #0d6efd;
+    }
+
+    .translations {
+      text-align: center;
+      margin-top: 20px;
+    }
+    .translations a {
+      color: #0d6efd;
+      font-weight: bold;
+      text-decoration: none;
+      margin: 0 10px;
+    }
+    .translations a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <span>🎓 Student Dashboard</span>
+    <a href="{{ url_for('logout') }}">Logout</a>
+  </header>
+
+  <div class="container">
+    <!-- Upload form -->
+    <form action="{{ url_for('upload_textbook') }}" method="POST" enctype="multipart/form-data" class="upload-box">
+      <h3>📚 Upload Your Textbook</h3>
+      <input type="file" name="textbook" accept=".pdf,.docx,.txt" required>
+      <br>
+      <button type="submit">Upload</button>
+    </form>
+
+    <!-- Show uploaded file -->
+    {% if session.get('uploaded_file') %}
+      <p style="text-align:center; margin-top:15px;">
+        Current Textbook: <b>{{ session['uploaded_file'] }}</b>
+      </p>
+    {% endif %}
+
+    <!-- Feature buttons toolbar -->
+    <div class="actions-container">
+      <h3 style="text-align:center; margin-bottom:20px;">✨ Features</h3>
+      <div class="actions">
+        <a href="{{ url_for('library') }}">
+          <button type="button">📚 Library</button>
+        </a>
+        <form action="{{ url_for('audio_narration') }}" method="POST">
+          <button type="submit">🎧 Audio Narration</button>
+        </form>
+        <form action="{{ url_for('generate_summary') }}" method="POST">
+          <button type="submit">✍️ Simplified Summary</button>
+        </form>
+        <form action="{{ url_for('translate_text') }}" method="POST">
+          <button type="submit">🌍 Translate</button>
+        </form>
+        <form action="{{ url_for('dyslexic_friendly') }}" method="POST" target="_blank">
+          <button type="submit">🔤 Dyslexic-Friendly</button>
+        </form>
+        <form action="{{ url_for('generate_flashcards') }}" method="POST">
+          <button type="submit">🃏 Flashcards</button>
+        </form>
+        <form action="{{ url_for('generate_quiz') }}" method="POST">
+          <button type="submit">📝 Quiz</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Audio player -->
+    {% if audio_file %}
+      <div class="audio-player">
+        <h3>🎧 Listen to Narration:</h3>
+        <audio controls style="width:100%;">
+          <source src="{{ url_for('static', filename='narrations/' + audio_file) }}" type="audio/mpeg">
+          Your browser does not support the audio element.
+        </audio>
+      </div>
+    {% endif %}
+
+    <!-- Summary display -->
+    {% if summary %}
+      <div class="summary-box">
+        <h3>✍️ Simplified Summary:</h3>
+        <p>{{ summary }}</p>
+      </div>
+    {% endif %}
+
+    <!-- Download Translations -->
+    {% if hindi_file and kannada_file %}
+      <div class="translations">
+        📘 Download Translations: 
+        <a href="{{ url_for('static', filename='translations/' ~ hindi_file) }}" target="_blank">Hindi</a>
+        
+      </div>
+    {% endif %}
+  </div>
+</body>
+</html>

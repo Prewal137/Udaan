@@ -1,0 +1,84 @@
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<div class="container my-5">
+    <h1 class="mb-5 text-center fw-bold">📊 Student Progress Dashboard</h1>
+
+    {% for p in progress_data %}
+    <div class="card mb-4 shadow-sm border-0 rounded-3">
+        <div class="card-header bg-primary text-white rounded-top">
+            <h4 class="mb-0">
+                <a class="text-white text-decoration-none d-block" 
+                   data-bs-toggle="collapse" 
+                   href="#student{{ loop.index }}" 
+                   role="button" 
+                   aria-expanded="false" 
+                   aria-controls="student{{ loop.index }}">
+                    {{ p.student.name }} 
+                    <small class="text-light">| Grade: {{ p.student.grade }}</small>
+                </a>
+            </h4>
+        </div>
+
+        <div class="collapse" id="student{{ loop.index }}">
+            <div class="card-body">
+                <p class="mb-2">
+                    <strong>Age:</strong> {{ p.student.age }} | 
+                    <strong>Accessibility:</strong> {{ p.student.accessibility }}
+                </p>
+                <p class="mb-3">
+                    <strong>Email:</strong> {{ p.student.email }} | 
+                    <strong>Phone:</strong> {{ p.student.phone }}
+                </p>
+
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <h5 class="mt-2 mb-3">📚 Textbooks Uploaded</h5>
+                        <span class="badge bg-success mb-2">{{ p.total_uploads }}</span>
+                        <ul class="list-group list-group-flush mb-2">
+                            {% for u in p.uploads %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                {{ u.filename }}
+                                <small class="text-muted">{{ u.uploaded_at }}</small>
+                            </li>
+                            {% endfor %}
+                            {% if p.uploads|length == 0 %}
+                            <li class="list-group-item text-muted">No textbooks uploaded</li>
+                            {% endif %}
+                        </ul>
+                        <div class="progress">
+                            <div class="progress-bar bg-success" role="progressbar" style="width: {{ (p.total_uploads/10)*100 }}%" 
+                                 aria-valuenow="{{ p.total_uploads }}" aria-valuemin="0" aria-valuemax="10">
+                                {{ p.total_uploads }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <h5 class="mt-2 mb-3">🃏 Flashcards Generated</h5>
+                        <span class="badge bg-info mb-2">{{ p.total_flashcards }}</span>
+                        <ul class="list-group list-group-flush mb-2">
+                            {% for f in p.flashcards %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                {{ f.filename }}
+                                <span class="badge bg-secondary">{{ f.num_flashcards }} cards</span>
+                            </li>
+                            {% endfor %}
+                            {% if p.flashcards|length == 0 %}
+                            <li class="list-group-item text-muted">No flashcards generated</li>
+                            {% endif %}
+                        </ul>
+                        <div class="progress">
+                            <div class="progress-bar bg-info" role="progressbar" style="width: {{ (p.total_flashcards/20)*100 }}%" 
+                                 aria-valuenow="{{ p.total_flashcards }}" aria-valuemin="0" aria-valuemax="20">
+                                {{ p.total_flashcards }}
+                            </div>
+                        </div>
+                    </div>                    
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

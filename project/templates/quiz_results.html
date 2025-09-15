@@ -1,0 +1,27 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Quiz Results</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 30px; }
+    .result-box { margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 10px; }
+    .correct { color: green; }
+    .wrong { color: red; }
+  </style>
+</head>
+<body>
+  <h2>📊 Quiz Results</h2>
+  <p><b>Score: {{ score }}/{{ total }}</b></p>
+
+  {% for r in results %}
+    <div class="result-box">
+      <p><b>Q{{ loop.index }}. {{ r.question }}</b></p>
+      <p>Your Answer: <span class="{{ 'correct' if r.is_correct else 'wrong' }}">{{ r.your_answer }}</span></p>
+      <p>Correct Answer: <b>{{ r.correct_answer }}</b></p>
+    </div>
+  {% endfor %}
+
+  <a href="{{ url_for('student_dashboard') }}">⬅ Back to Dashboard</a>
+</body>
+</html>

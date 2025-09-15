@@ -1,0 +1,133 @@
+body {
+  font-family: Arial, sans-serif;
+  background-image: url("bot.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  justify-content: flex-start; /* ⬅️ push container to left */
+  align-items: center;         /* keep vertically centered */
+}
+
+.container {
+  width: 420px;
+  padding: 32px;
+  border-radius: 16px;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.25);
+  text-align: center;
+  margin-left: 40px; /* add some spacing from the edge */
+}
+
+
+/* Buttons */
+.role-buttons {
+  margin-top: 20px;
+}
+
+.role-buttons .btn {
+  display: inline-block;
+  margin: 8px;
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-weight: bold;
+  border-radius: 10px;
+  text-decoration: none;
+  color: white;
+  background: linear-gradient(135deg, #4facfe, #00f2fe);
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.role-buttons .btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  opacity: 0.95;
+}
+
+/* Login card styling */
+.form-container {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 40px 30px;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  max-width: 400px;
+  width: 100%;
+  text-align: left;
+}
+
+.form-container h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #0d6efd;
+  font-size: 1.8rem;
+}
+
+/* Flash messages */
+.flash {
+  list-style: none;
+  padding: 12px;
+  margin-bottom: 15px;
+  background: #ffe0e0;
+  color: #b02a37;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+/* Inputs */
+.form-container input {
+  width: 100%;
+  padding: 10px 12px;
+  margin-top: 6px;
+  margin-bottom: 14px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease;
+}
+
+.form-container input:focus {
+  outline: none;
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 3px rgba(13,110,253,0.2);
+}
+
+/* Button */
+.form-container button {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #4facfe, #00f2fe);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.form-container button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+  opacity: 0.95;
+}
+
+/* Links */
+.form-container p {
+  text-align: center;
+  margin-top: 14px;
+  font-size: 0.95rem;
+}
+
+.form-container a {
+  color: #0d6efd;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.form-container a:hover {
+  text-decoration: underline;
+}

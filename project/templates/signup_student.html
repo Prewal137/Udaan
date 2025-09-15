@@ -1,0 +1,53 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Student Signup</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <div class="container form-container">
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul class="flash">
+          {% for msg in messages %}<li>{{ msg }}</li>{% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    <h2>Student Signup</h2>
+    <form method="POST" action="{{ url_for('signup_student') }}">
+      <label>Name *</label>
+      <input name="name" required>
+
+      <label>Age</label>
+      <input name="age" type="number" min="3">
+
+      <label>Grade / Class</label>
+      <input name="grade">
+
+      <label>Accessibility needs</label>
+      <select name="accessibility">
+        <option value="">None</option>
+        <option value="dyslexia">Dyslexia</option>
+        <option value="vision">Vision impairment</option>
+        <option value="audio">Audio preference</option>
+      </select>
+
+      <label>Email</label>
+      <input name="email" type="email">
+
+      <label>Phone</label>
+      <input name="phone" type="tel">
+
+      <label>Password *</label>
+      <input type="password" name="password" required>
+
+      <button type="submit">Sign Up</button>
+    </form>
+
+    <p>Already have an account? <a href="{{ url_for('login_student') }}">Login</a></p>
+    <p><a href="{{ url_for('index') }}">Back</a></p>
+  </div>
+</body>
+</html>

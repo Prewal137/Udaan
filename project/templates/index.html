@@ -1,0 +1,18 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Choose role</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <div class="container">
+    <h1>Welcome 👋</h1>
+    <p>Choose your role:</p>
+    <div class="role-buttons">
+      <a class="btn" href="{{ url_for('role_page', role='student') }}">Student</a>
+      <a class="btn" href="{{ url_for('role_page', role='teacher') }}">Teacher / Parent</a>
+    </div>
+  </div>
+</body>
+</html>

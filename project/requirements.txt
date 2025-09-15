@@ -1,0 +1,13 @@
+Flask
+Werkzeug
+PyPDF2
+pyttsx3
+google-generativeai
+deep-translator
+reportlab
+googletrans==4.0.0-rc1
+pillow
+pdf2image
+pytesseract
+PyMuPDF
+python-dotenv

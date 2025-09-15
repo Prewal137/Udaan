@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>{{ role|capitalize }} - Auth</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <div class="container">
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul class="flash">
+          {% for msg in messages %}<li>{{ msg }}</li>{% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    <h1>{{ role|capitalize }}</h1>
+    <p>Do you want to sign up or login?</p>
+    <div class="role-buttons">
+      {% if role == 'student' %}
+        <a class="btn" href="{{ url_for('signup_student') }}">Sign Up</a>
+        <a class="btn" href="{{ url_for('login_student') }}">Login</a>
+      {% else %}
+        <a class="btn" href="{{ url_for('signup_teacher') }}">Sign Up</a>
+        <a class="btn" href="{{ url_for('login_teacher') }}">Login</a>
+      {% endif %}
+    </div>
+
+    <p><a href="{{ url_for('index') }}">Back</a></p>
+  </div>
+</body>
+</html>

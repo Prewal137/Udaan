@@ -1,0 +1,167 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Dyslexic-Friendly Reader</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Lexend&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Lexend', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #fffde7; 
+      color: #222;
+      line-height: 1.8;
+    }
+
+    .controls {
+      position: fixed;
+      top: 15px;
+      right: 15px;
+      background: #ffffffee;
+      padding: 15px 20px;
+      border-radius: 12px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+      z-index: 1000;
+      font-size: 14px;
+    }
+
+    .controls label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .controls input[type=range] {
+      width: 150px;
+    }
+
+    .controls button {
+      margin-top: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: 0.2s;
+    }
+
+    #ttsBtn {
+      background: #4CAF50;
+      color: white;
+    }
+    #ttsBtn:hover { background: #43a047; }
+
+    #stopBtn {
+      background: #e53935;
+      color: white;
+    }
+    #stopBtn:hover { background: #c62828; }
+
+    #reader {
+      margin: 120px auto 40px;
+      max-width: 900px;
+      padding: 25px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+      font-size: 18px;
+    }
+
+    .highlight {
+      background-color: #ffca28; 
+      border-radius: 4px;
+      padding: 2px 4px;
+    }
+
+    p {
+      margin-bottom: 1em;
+    }
+  </style>
+</head>
+<body>
+  <div class="controls">
+    <label>Font Size: <input type="range" id="fontSize" min="14" max="32" value="18"></label>
+    <label>Line Height: <input type="range" id="lineHeight" min="1" max="3" step="0.1" value="1.8"></label>
+    <label>Speech Rate: <input type="range" id="speechRate" min="0.5" max="2" step="0.1" value="1"></label>
+    <label>Pitch: <input type="range" id="speechPitch" min="0.5" max="2" step="0.1" value="1"></label>
+    <button id="ttsBtn">🔊 Read Aloud</button>
+    <button id="stopBtn">⏹ Stop</button>
+  </div>
+
+  <div id="reader"></div>
+
+<script>
+const reader = document.getElementById('reader');
+const fontSizeSlider = document.getElementById('fontSize');
+const lineHeightSlider = document.getElementById('lineHeight');
+const ttsBtn = document.getElementById('ttsBtn');
+const stopBtn = document.getElementById('stopBtn');
+const speechRateSlider = document.getElementById('speechRate');
+const speechPitchSlider = document.getElementById('speechPitch');
+
+// Get text from server
+const rawText = `{{ text|replace('\n', '\\n')|safe }}`;
+
+// Split text into paragraphs
+const paragraphs = rawText.split(/\n+/);
+
+// Wrap each word in span inside <p>
+reader.innerHTML = paragraphs.map(para => {
+  const words = para.split(/\s+/).map(word => `<span>${word} </span>`).join('');
+  return `<p>${words}</p>`;
+}).join('');
+
+// Font and line height controls
+fontSizeSlider.addEventListener('input', () => { reader.style.fontSize = fontSizeSlider.value + 'px'; });
+lineHeightSlider.addEventListener('input', () => { reader.style.lineHeight = lineHeightSlider.value; });
+
+// Speech synthesis
+let utterance;
+let allSpans = Array.from(reader.querySelectorAll('span'));
+let wordsFlat = allSpans.map(s => s.textContent.trim());
+
+function startReading(startIndex = 0) {
+  speechSynthesis.cancel();
+  Array.from(reader.querySelectorAll('span')).forEach(s => s.classList.remove('highlight'));
+
+  const textToSpeak = wordsFlat.slice(startIndex).join(' ');
+
+  utterance = new SpeechSynthesisUtterance(textToSpeak);
+  utterance.rate = parseFloat(speechRateSlider.value);
+  utterance.pitch = parseFloat(speechPitchSlider.value);
+
+  let charCount = 0;
+  utterance.onboundary = (event) => {
+    if (event.name === 'word') {
+      let charsCounted = 0;
+      for (let i = startIndex; i < wordsFlat.length; i++) {
+        charsCounted += wordsFlat[i].length + 1;
+        if (charsCounted > event.charIndex) {
+          allSpans.forEach(s => s.classList.remove('highlight'));
+          allSpans[i].classList.add('highlight');
+          break;
+        }
+      }
+    }
+  };
+
+  utterance.onend = () => { allSpans.forEach(s => s.classList.remove('highlight')); };
+  speechSynthesis.speak(utterance);
+}
+
+// Click on a word to start reading from there
+allSpans.forEach((span, idx) => {
+  span.style.cursor = 'pointer';
+  span.addEventListener('click', () => { startReading(idx); });
+});
+
+// Buttons
+ttsBtn.addEventListener('click', () => { startReading(0); });
+stopBtn.addEventListener('click', () => { speechSynthesis.cancel(); allSpans.forEach(s => s.classList.remove('highlight')); });
+</script>
+</body>
+</html>

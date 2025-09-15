@@ -1,0 +1,58 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Teacher/Parent Signup</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <div class="container form-container">
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul class="flash">
+          {% for msg in messages %}<li>{{ msg }}</li>{% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    <h2>Teacher / Parent Signup</h2>
+    <form method="POST" action="{{ url_for('signup_teacher') }}">
+      <label>Name *</label>
+      <input name="name" required>
+
+      <label>Email</label>
+      <input name="email" type="email">
+
+      <label>Phone</label>
+      <input name="phone" type="tel">
+
+      
+
+      <div id="password_row_t">
+        <label>Password *</label>
+        <input type="password" name="password" id="password_input_t">
+      </div>
+
+      <button type="submit">Sign Up</button>
+    </form>
+
+    <p>Already have an account? <a href="{{ url_for('login_teacher') }}">Login</a></p>
+    <p><a href="{{ url_for('index') }}">Back</a></p>
+  </div>
+
+<script>
+function onMethodChangeT(){
+  const method = document.getElementById('login_method_t').value;
+  const pwRow = document.getElementById('password_row_t');
+  if(method === 'Password') {
+    pwRow.style.display = 'block';
+    document.getElementById('password_input_t').required = true;
+  } else {
+    pwRow.style.display = 'none';
+    document.getElementById('password_input_t').required = false;
+  }
+}
+window.onload = onMethodChangeT;
+</script>
+</body>
+</html>
