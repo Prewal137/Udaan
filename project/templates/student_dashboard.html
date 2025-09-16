@@ -9,93 +9,78 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root{
-            --bg:#f7fbff;
+            --bg:#f5f9ff;
             --panel:#ffffff;
             --muted:#64748b;
             --text:#0f172a;
             --border:#e5e7eb;
             --primary:#2563eb;
             --primary-500:#3b82f6;
+            --primary-300:#93c5fd;
             --green:#10b981;
-            --shadow:0 20px 60px rgba(2,6,23,0.10);
-            --shadow-soft:0 8px 28px rgba(2,6,23,0.06);
+            --purple:#7c3aed;
+            --shadow:0 20px 60px rgba(2,6,23,0.12);
+            --shadow-soft:0 10px 30px rgba(2,6,23,0.08);
         }
         *{box-sizing:border-box}
         html,body{height:100%}
-        body{margin:0;font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
+        body{margin:0;font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(1200px 900px at 10% -10%, #eef5ff 0%, #ffffff 55%);color:var(--text)}
 
-        .layout{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+        .layout{display:grid;grid-template-columns:300px 1fr;min-height:100vh}
         /* Sidebar */
-        .sidebar{background:#eef4ff;border-right:1px solid #dbeafe;display:flex;flex-direction:column;}
+        .sidebar{background:linear-gradient(180deg,#f3f7ff 0%, #f8fbff 100%);border-right:1px solid #dbeafe;display:flex;flex-direction:column;gap:16px;padding-bottom:10px}
         .nav-top{padding:14px 16px;border-bottom:1px solid #dbeafe;display:flex;gap:10px;justify-content:space-between;flex-wrap:wrap}
-        .nav-top a{color:#1e3a8a;text-decoration:none;font-weight:600;padding:8px 10px;border-radius:8px}
-        .nav-top a:hover{background:#e0ecff}
+        .nav-top a{color:#1e3a8a;text-decoration:none;font-weight:700;padding:10px 12px;border-radius:10px;transition:all .18s ease}
+        .nav-top a:hover{background:#eaf2ff;box-shadow:0 8px 22px rgba(59,130,246,.18)}
         .greeting{padding:18px}
-        .greeting .hello{display:flex;align-items:center;gap:12px}
-        .robot{width:44px;height:44px;border-radius:12px;background:#e2e8f0;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-soft)}
+        .hello{display:flex;align-items:center;gap:12px;background:#ffffff;border:1px solid var(--border);border-radius:14px;padding:12px 14px;box-shadow:var(--shadow-soft)}
+        .robot{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#e9d5ff,#dbeafe);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(124,58,237,.18)}
         .robot::before{content:'🤖';font-size:22px}
-        .greeting h2{margin:8px 0 4px 0;font-size:18px}
         .greeting p{margin:0;color:var(--muted);font-size:14px}
-        .quick{padding:0 18px 18px 18px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
-        .quick a,.quick button{appearance:none;border:1px solid #e2e8f0;background:#fff;border-radius:14px;padding:14px;display:flex;gap:10px;align-items:center;justify-content:center;cursor:pointer;text-decoration:none;color:#0f172a;font-weight:700;box-shadow:var(--shadow-soft);transition:transform .15s ease, box-shadow .15s ease}
-        .quick a:hover,.quick button:hover{transform:translateY(-2px);box-shadow:0 14px 32px rgba(2,6,23,.12)}
+
+        .quick{padding:0 18px 8px 18px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        .quick a,.quick button{appearance:none;border:1px solid #e2e8f0;background:#fff;border-radius:16px;padding:16px 14px;display:flex;gap:10px;align-items:center;justify-content:center;cursor:pointer;text-decoration:none;color:#0f172a;font-weight:800;box-shadow:0 8px 26px rgba(2,6,23,.06);transition:transform .15s ease, box-shadow .15s ease, border-color .15s}
+        .quick a:hover,.quick button:hover{transform:translateY(-3px);box-shadow:0 16px 40px rgba(2,6,23,.14);border-color:#c7d2fe}
         .progress{padding:0 18px 18px 18px}
         .progress h3{margin:0 0 10px 0;font-size:14px;color:#1f2937}
-        .bar{height:10px;background:#e5e7eb;border-radius:999px;overflow:hidden}
-        .fill{height:100%;width:48%;background:linear-gradient(90deg,var(--primary-500),#60a5fa);border-radius:999px}
-
-        /* Textbook preview placeholder */
-        .preview{margin:12px 18px 18px 18px;border:1px solid #e2e8f0;border-radius:16px;background:#fff;box-shadow:var(--shadow-soft);overflow:hidden}
-        .preview .head{padding:12px 14px;border-bottom:1px solid #e5e7eb;font-weight:700;color:#1f2937}
-        .preview .body{display:grid;grid-template-columns:140px 1fr;min-height:220px}
-        .toc{border-right:1px solid #e5e7eb;padding:12px}
-        .toc h4{margin:0 0 8px 0;font-size:13px;color:#334155}
-        .toc ul{list-style:none;padding:0;margin:0;display:grid;gap:6px}
-        .toc li{padding:6px 8px;border-radius:8px;cursor:default;background:#f8fafc;border:1px dashed #e5e7eb;color:#475569}
-        .doc{padding:12px;display:grid;gap:10px}
-        .doc .tabs{display:flex;gap:8px}
-        .chip{padding:8px 10px;border-radius:999px;border:1px solid #e5e7eb;background:#f8fafc;color:#334155;font-weight:600;font-size:12px}
-        .doc h3{margin:6px 0 0 0}
-        .doc .actions{display:flex;gap:8px}
-        .btn-sm{padding:8px 10px;border-radius:10px;border:1px solid #e5e7eb;background:#fff;cursor:pointer}
+        .bar{height:10px;background:#e5e7eb;border-radius:999px;overflow:hidden;box-shadow:inset 0 1px 2px rgba(0,0,0,.05)}
+        .fill{height:100%;width:48%;background:linear-gradient(90deg,var(--primary-300),var(--primary-500));border-radius:999px;box-shadow:0 6px 16px rgba(59,130,246,.35)}
 
         /* Main content */
-        .main{padding:28px;display:grid;gap:22px}
+        .main{padding:28px;display:grid;gap:22px;background:linear-gradient(180deg,rgba(243,246,255,.55) 0%, rgba(255,255,255,1) 26%) }
         .main-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap}
-        .title{font-size:28px;margin:0}
+        .title{font-size:30px;margin:0}
         .subtitle{margin:2px 0 0 0;color:var(--muted)}
-        .logout{color:#1d4ed8;text-decoration:none;font-weight:600}
-        .logout:hover{text-decoration:underline}
+        .logout{color:#1d4ed8;text-decoration:none;font-weight:700;transition:all .15s ease}
+        .logout:hover{text-decoration:underline;filter:brightness(1.1)}
 
-        .card{background:var(--panel);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow-soft)}
-        .card .card-header{padding:18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+        .card{background:var(--panel);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow-soft);overflow:hidden}
+        .card .card-header{padding:18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;background:linear-gradient(180deg,#ffffff 0%, #fbfdff 100%)}
         .card .card-header h3{margin:0;font-size:18px}
         .card .card-content{padding:18px}
 
         /* Upload Section */
         .upload-grid{display:grid;grid-template-columns:1fr;gap:14px}
-        .dropzone{border:2px dashed #93c5fd;border-radius:14px;padding:24px;text-align:center;background:linear-gradient(180deg,#f8fbff,#ffffff)}
+        .dropzone{border:2px dashed #93c5fd;border-radius:16px;padding:28px;text-align:center;background:linear-gradient(180deg,#f8fbff,#ffffff);transition:box-shadow .2s ease, border-color .2s ease}
+        .dropzone:hover{border-color:#60a5fa;box-shadow:0 18px 46px rgba(59,130,246,.22)}
         .dropzone p{margin:8px 0;color:#475569}
         .file-row{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap}
-        .file-row input[type=file]{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px}
-        .btn-primary{appearance:none;border:none;border-radius:12px;padding:12px 18px;background:linear-gradient(90deg,var(--primary-500),#2563eb);color:#fff;font-weight:800;cursor:pointer;box-shadow:0 12px 28px rgba(37,99,235,0.24)}
+        .file-row input[type=file]{background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:10px}
+        .btn-primary{appearance:none;border:none;border-radius:12px;padding:12px 18px;background:linear-gradient(90deg,var(--primary-500),#2563eb);color:#fff;font-weight:800;cursor:pointer;box-shadow:0 14px 34px rgba(37,99,235,0.28);transition:transform .15s ease, box-shadow .15s ease, filter .15s}
+        .btn-primary:hover{transform:translateY(-2px);box-shadow:0 20px 44px rgba(37,99,235,.36);filter:brightness(1.05)}
         .current-file{margin-top:10px;text-align:center;color:#334155}
 
         /* Learning Features */
-        .features{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
-        .feature{border:1px solid var(--border);border-radius:14px;background:#fff;padding:16px;box-shadow:var(--shadow-soft)}
+        .features{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+        .feature{border:1px solid var(--border);border-radius:16px;background:#fff;padding:18px;box-shadow:0 10px 26px rgba(2,6,23,.07);transition:transform .18s ease, box-shadow .18s ease}
+        .feature:hover{transform:translateY(-3px);box-shadow:0 22px 48px rgba(2,6,23,.16)}
         .feature h4{margin:0 0 8px 0}
         .feature p{margin:0 0 12px 0;color:#475569}
         .feature form,.feature a{display:block}
-        .feature button,.feature a.btn{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #e2e8f0;background:#f8fafc;cursor:pointer;text-align:center;text-decoration:none;color:#0f172a;font-weight:700}
-        .feature button:hover,.feature a.btn:hover{background:#eef2ff}
+        .feature button,.feature a.btn{width:100%;padding:10px 12px;border-radius:12px;border:1px solid #e2e8f0;background:linear-gradient(180deg,#f9fbff,#fefefe);cursor:pointer;text-align:center;text-decoration:none;color:#0f172a;font-weight:800;transition:all .15s ease}
+        .feature button:hover,.feature a.btn:hover{background:linear-gradient(180deg,#eef4ff,#ffffff);border-color:#c7d2fe;box-shadow:0 10px 28px rgba(124,58,237,.15)}
 
-        @media (max-width: 1024px){
-            .layout{grid-template-columns:220px 1fr}
-            .preview .body{grid-template-columns:1fr}
-            .toc{border-right:0;border-bottom:1px solid #e5e7eb}
-        }
-        @media (max-width: 760px){
+        @media (max-width: 1060px){
             .layout{grid-template-columns:1fr}
             .sidebar{position:relative}
         }
@@ -108,7 +93,6 @@
             <nav class="nav-top">
                 <a href="#">Dashboard</a>
                 <a href="{{ url_for('library') }}">Textbooks</a>
-                <a href="#">Games</a>
                 <a href="{{ url_for('dyslexic_friendly') }}" onclick="event.preventDefault(); document.getElementById('openDysForm').submit();">Accessibility</a>
                 <a href="#">Support</a>
             </nav>
@@ -116,7 +100,7 @@
                 <div class="hello">
                     <div class="robot"></div>
                     <div>
-                        <div style="font-weight:800">Hello {{ name or 'Student' }}!</div>
+                        <div style="font-weight:900">Hello {{ name or 'Student' }}!</div>
                         <p>Let's continue your learning today.</p>
                     </div>
                 </div>
@@ -125,38 +109,10 @@
                 <a href="{{ url_for('library') }}">📚 My Textbooks</a>
                 <button onclick="document.getElementById('listenForm').submit()">🎧 Listen</button>
                 <button onclick="document.getElementById('summaryForm').submit()">📝 Summaries</button>
-                <button onclick="document.getElementById('quizForm').submit()">🎮 Games & Quizzes</button>
             </div>
             <div class="progress">
                 <h3>Progress</h3>
                 <div class="bar"><div class="fill"></div></div>
-            </div>
-            <div class="preview">
-                <div class="head">Textbook Section</div>
-                <div class="body">
-                    <div class="toc">
-                        <h4>Table of contents</h4>
-                        <ul>
-                            <li>Chapter 1</li>
-                            <li>Chapter 2</li>
-                            <li>Chapter 3</li>
-                            <li>Chapter 4</li>
-                        </ul>
-                    </div>
-                    <div class="doc">
-                        <div class="tabs">
-                            <span class="chip">Normal View</span>
-                            <span class="chip">Dyslexia-Friendly View</span>
-                            <span class="chip">Simplified</span>
-                        </div>
-                        <h3>Textbook Title</h3>
-                        <div class="actions">
-                            <button class="btn-sm">Listen</button>
-                            <button class="btn-sm">Summ</button>
-                            <button class="btn-sm">Trans-</button>
-                        </div>
-                    </div>
-                </div>
             </div>
         </aside>
 
@@ -238,8 +194,15 @@
                         <div class="feature">
                             <h4>🃏 Flashcards</h4>
                             <p>Auto-generated flashcards from your materials.</p>
-                            <form id="quizForm" action="{{ url_for('generate_flashcards') }}" method="POST">
+                            <form id="flashcardsForm" action="{{ url_for('generate_flashcards') }}" method="POST">
                                 <button type="submit">Create Flashcards</button>
+                            </form>
+                        </div>
+                        <div class="feature">
+                            <h4>🧠 Quizzes</h4>
+                            <p>Generate a quiz from your current textbook.</p>
+                            <form action="{{ url_for('generate_quiz') }}" method="POST">
+                                <button type="submit">Start Quiz</button>
                             </form>
                         </div>
                     </div>

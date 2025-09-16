@@ -5,22 +5,33 @@
   <title>Dyslexic-Friendly Reader – Udaan</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
   <style>
-    /* Local enhancements specific to the reader */
     .toolbar { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:16px; }
     .toolbar label { font-weight:600; margin-right:6px; }
     .toolbar .control-group { display:flex; align-items:center; gap:8px; padding:8px 10px; background: rgba(255,255,255,0.7); border-radius:10px; }
     .reader-shell { position:relative; border-radius:16px; overflow:hidden; }
     .overlay { position:absolute; inset:0; pointer-events:none; opacity:0.25; background:#e3f6ff; transition:background 0.2s, opacity 0.2s; }
     .reader { position:relative; z-index:1; padding:28px; background:rgba(255,255,255,0.9); border-radius:16px; line-height:1.6; white-space:pre-wrap; }
-    .tts-controls { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
     .badge-small { font-size: 0.85rem; padding: 2px 8px; border-radius: 8px; background: #eef6ff; color:#2563eb; }
+
+    /* Top-right controls */
+    .topbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+    .controls-top { display:flex; gap:8px; align-items:center; }
+
+    /* Speaking highlight */
+    .word-speaking { background: #ffd54f; color: #111827; border-radius: 4px; box-shadow: 0 0 0 2px rgba(255, 213, 79, 0.75); }
   </style>
 </head>
 <body>
   <section class="glass-panel fade-in dyslexic-mode" style="max-width:900px;margin:32px auto;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+    <div class="topbar">
       <h2 style="margin:0;">Accessible Reading</h2>
-      <a href="{{ url_for('student_dashboard') }}" class="badge">⬅ Back to Dashboard</a>
+      <div class="controls-top">
+        <button id="playSelBtn" class="button" style="display:none;" onclick="playSelectionServer()">▶ Play Selection</button>
+        <button class="button" onclick="playFullServer()">▶ Play</button>
+        <button class="button" onclick="pauseServerAudio()">⏸ Pause</button>
+        <button class="button" onclick="stopServerAudio()">⏹ Stop</button>
+        <a href="{{ url_for('student_dashboard') }}" class="badge">Back</a>
+      </div>
     </div>
 
     <div class="toolbar" role="region" aria-label="Reading preferences">
@@ -66,23 +77,15 @@
       <div id="readerContent" class="reader" tabindex="0">{{ text }}</div>
     </div>
 
-    <div class="tts-controls" role="region" aria-label="Text to speech controls">
-      <button class="button" onclick="ttsPlay()">▶ Play</button>
-      <button class="button" onclick="ttsPause()">⏸ Pause</button>
-      <button class="button" onclick="ttsStop()">⏹ Stop</button>
-      <span class="badge-small" id="ttsStatus" aria-live="polite">Ready</span>
-      <div class="control-group" style="margin-left:auto;">
-        <label for="ttsRate">Rate</label>
-        <input id="ttsRate" type="range" min="0.6" max="1.4" step="0.1" value="1" oninput="updateSpeechParams()">
-        <label for="ttsPitch">Pitch</label>
-        <input id="ttsPitch" type="range" min="0.6" max="1.4" step="0.1" value="1" oninput="updateSpeechParams()">
-      </div>
-    </div>
+    <div style="margin-top:10px; color:#64748b;">Press Play to start audio + highlighting. Click any word to jump there. <span id="ttsStatus" class="badge-small">Ready</span></div>
   </section>
+
+  <audio id="srvAudio" preload="auto"></audio>
 
   <script>
     const reader = document.getElementById('readerContent');
-    const overlay = document.getElementById('overlay');
+    const playSelBtn = document.getElementById('playSelBtn');
+    const srvAudio = document.getElementById('srvAudio');
 
     function applyTypography(){
       const font = document.getElementById('fontSelect').value;
@@ -90,77 +93,148 @@
       const line = document.getElementById('lineHeight').value;
       const word = document.getElementById('wordSpacing').value;
       const letter = document.getElementById('letterSpacing').value;
-
       reader.style.fontFamily = font;
       reader.style.fontSize = size + 'px';
       reader.style.lineHeight = line;
       reader.style.wordSpacing = word + 'em';
       reader.style.letterSpacing = letter + 'em';
-
       document.getElementById('fontSizeVal').textContent = size + 'px';
       document.getElementById('lineHeightVal').textContent = line;
       document.getElementById('wordSpacingVal').textContent = word + 'em';
       document.getElementById('letterSpacingVal').textContent = letter + 'em';
     }
-
     function applyOverlay(){
       const color = document.getElementById('overlayColor').value;
       const opacity = document.getElementById('overlayOpacity').value;
+      const overlay = document.getElementById('overlay');
       overlay.style.background = color;
       overlay.style.opacity = opacity;
     }
-
-    // Initialize defaults
     applyTypography();
     applyOverlay();
 
-    // ---------- TTS (Web Speech API) ----------
-    let utterance = null;
-    function getText(){ return reader.textContent || ''; }
+    function getSelectedText(){ const s = window.getSelection(); return s && s.toString().trim(); }
+    function getReaderText(){ return reader.textContent || ''; }
+    function setTtsStatus(msg){ const el = document.getElementById('ttsStatus'); if(el) el.textContent = msg; }
 
-    function ensureUtterance(){
-      if(!utterance){ utterance = new SpeechSynthesisUtterance(getText()); }
-      utterance.text = getText();
-      utterance.rate = parseFloat(document.getElementById('ttsRate').value);
-      utterance.pitch = parseFloat(document.getElementById('ttsPitch').value);
-      utterance.onstart = () => setTtsStatus('Speaking');
-      utterance.onend = () => setTtsStatus('Finished');
-      utterance.onerror = () => setTtsStatus('Error');
-    }
+    // Word highlighting map
+    let timingMap = [];
+    let wordSpans = [];
 
-    function setTtsStatus(msg){
-      const el = document.getElementById('ttsStatus');
-      el.textContent = msg;
-    }
+    function clearHighlights(){ wordSpans.forEach(s=> s.classList.remove('word-speaking')); }
 
-    function ttsPlay(){
-      if(!('speechSynthesis' in window)){
-        setTtsStatus('TTS not supported');
-        return;
-      }
-      window.speechSynthesis.cancel();
-      ensureUtterance();
-      window.speechSynthesis.speak(utterance);
-    }
-
-    function ttsPause(){
-      if(window.speechSynthesis.speaking){ window.speechSynthesis.pause(); setTtsStatus('Paused'); }
-    }
-
-    function ttsStop(){
-      if(window.speechSynthesis.speaking){ window.speechSynthesis.cancel(); setTtsStatus('Stopped'); }
-    }
-
-    function updateSpeechParams(){
-      if(utterance){
-        utterance.rate = parseFloat(document.getElementById('ttsRate').value);
-        utterance.pitch = parseFloat(document.getElementById('ttsPitch').value);
-        if(window.speechSynthesis.speaking && !window.speechSynthesis.paused){
-          window.speechSynthesis.cancel();
-          window.speechSynthesis.speak(utterance);
+    function wrapWordsForHighlight(text){
+      reader.innerHTML = '';
+      wordSpans = [];
+      const frag = document.createDocumentFragment();
+      const tokens = text.split(/(\s+)/);
+      let wordIndex = 0;
+      tokens.forEach(t =>{
+        if(/\s+/.test(t)) { frag.appendChild(document.createTextNode(t)); }
+        else {
+          const span = document.createElement('span');
+          span.textContent = t;
+          span.dataset.wordIndex = wordIndex;
+          span.style.cursor = 'pointer';
+          span.addEventListener('click', ()=> seekToWord(parseInt(span.dataset.wordIndex,10)));
+          frag.appendChild(span);
+          wordSpans.push(span);
+          wordIndex++;
         }
+      });
+      reader.appendChild(frag);
+    }
+
+    function rescaleTimingsToDuration(){
+      if(!timingMap.length || !isFinite(srvAudio.duration) || srvAudio.duration <= 0) return;
+      const lastEnd = timingMap[timingMap.length - 1].end || 0;
+      if(lastEnd <= 0) return;
+      const scale = srvAudio.duration / lastEnd;
+      timingMap = timingMap.map(seg => ({ word: seg.word, start: seg.start * scale, end: seg.end * scale }));
+      // Add a subtle lag to match audible onset (Chrome/pyttsx3 empirical)
+      const lag = 0.12; // 120ms
+      timingMap = timingMap.map(seg => ({ word: seg.word, start: Math.max(0, seg.start + lag), end: Math.max(0, seg.end + lag) }));
+    }
+
+    function highlightAtTime(t){
+      if(!timingMap.length || !wordSpans.length) return;
+      const n = Math.min(timingMap.length, wordSpans.length);
+      let activeIdx = -1;
+      for(let i=0;i<n;i++){
+        const seg = timingMap[i];
+        if(t >= seg.start && t < seg.end){ activeIdx = i; break; }
+      }
+      for(let i=0;i<n;i++){
+        const span = wordSpans[i];
+        if(i === activeIdx){ span.classList.add('word-speaking'); }
+        else { span.classList.remove('word-speaking'); }
       }
     }
+
+    function seekToWord(index){
+      if(!timingMap.length || index < 0 || index >= timingMap.length) return;
+      const seg = timingMap[index];
+      // Seek to word start with tiny lead-in
+      const start = Math.max(0, seg.start - 0.02);
+      srvAudio.currentTime = start;
+      srvAudio.play();
+      setTtsStatus('Jumped to word');
+      highlightAtTime(srvAudio.currentTime);
+    }
+
+    // Server play for full content
+    function playFullServer(){
+      const text = getReaderText();
+      if(!text){ setTtsStatus('No text to read'); return; }
+      setTtsStatus('Generating audio...');
+      fetch('{{ url_for('api_read_selected_text') }}', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text })
+      }).then(r => r.json()).then(res =>{
+        if(res.error){ setTtsStatus(res.error); return; }
+        const { audio_url, timings } = res;
+        timingMap = timings || [];
+        wrapWordsForHighlight(text);
+        srvAudio.src = audio_url;
+        const onMeta = ()=>{ rescaleTimingsToDuration(); srvAudio.removeEventListener('loadedmetadata', onMeta); srvAudio.currentTime = 0; srvAudio.play(); setTtsStatus('Playing'); };
+        srvAudio.addEventListener('loadedmetadata', onMeta);
+      }).catch(err => setTtsStatus('Error: '+ err.message));
+    }
+
+    // Optional: selection-based play stays, but highlights only after play
+    function playSelectionServer(){
+      const sel = getSelectedText();
+      if(!sel){ setTtsStatus('Select text first'); return; }
+      setTtsStatus('Generating audio...');
+      fetch('{{ url_for('api_read_selected_text') }}', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: sel })
+      }).then(r => r.json()).then(res =>{
+        if(res.error){ setTtsStatus(res.error); return; }
+        const { audio_url, timings } = res;
+        timingMap = timings || [];
+        wrapWordsForHighlight(sel);
+        srvAudio.src = audio_url;
+        const onMeta = ()=>{ rescaleTimingsToDuration(); srvAudio.removeEventListener('loadedmetadata', onMeta); srvAudio.currentTime = 0; srvAudio.play(); setTtsStatus('Playing selection'); };
+        srvAudio.addEventListener('loadedmetadata', onMeta);
+      }).catch(err => setTtsStatus('Error: '+ err.message));
+    }
+
+    function pauseServerAudio(){ srvAudio.pause(); setTtsStatus('Paused'); }
+    function stopServerAudio(){ srvAudio.pause(); srvAudio.currentTime = 0; setTtsStatus('Stopped'); clearHighlights(); }
+
+    // Show Play Selection only when user selects
+    document.addEventListener('selectionchange', ()=>{ playSelBtn.style.display = getSelectedText() ? 'inline-flex' : 'none'; });
+
+    // Highlight on time updates
+    let rafId;
+    function loop(){ highlightAtTime(srvAudio.currentTime); if(!srvAudio.paused && !srvAudio.ended){ rafId = requestAnimationFrame(loop); } }
+    srvAudio.addEventListener('play', ()=>{ cancelAnimationFrame(rafId); rafId = requestAnimationFrame(loop); });
+    srvAudio.addEventListener('timeupdate', ()=>{ if(!srvAudio.paused) { highlightAtTime(srvAudio.currentTime); } });
+    srvAudio.addEventListener('pause', ()=> cancelAnimationFrame(rafId));
+    srvAudio.addEventListener('ended', ()=>{ cancelAnimationFrame(rafId); setTtsStatus('Finished'); clearHighlights(); });
   </script>
 </body>
 </html>

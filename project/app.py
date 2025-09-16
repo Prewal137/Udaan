@@ -1051,6 +1051,66 @@ def logout():
     flash("Logged out.")
     return redirect(url_for("index"))
 
+@app.route("/api/read-selected-text", methods=["POST"])
+@login_required(role="student")
+def api_read_selected_text():
+    try:
+        data = request.get_json(silent=True) or {}
+        raw_text = (data.get("text") or "").strip()
+        if not raw_text:
+            return {"error": "No text provided"}, 400
+
+        # Tokenize into words for timing (exclude pure whitespace)
+        words = re.findall(r"\S+", raw_text)
+        if not words:
+            return {"error": "No readable words found"}, 400
+
+        # Generate audio file path
+        student_id = session["user"]["id"]
+        timestamp = int(time.time())
+        os.makedirs("static/narrations", exist_ok=True)
+        audio_filename = f"sel_{student_id}_{timestamp}.mp3"
+        audio_path = os.path.join("static/narrations", audio_filename)
+
+        # Length-weighted timings with punctuation pause bonuses
+        def word_weight(w: str) -> float:
+            core = re.sub(r"^[^\w]+|[^\w]+$", "", w)
+            base = max(1, len(core))
+            bonus = 0.0
+            if re.search(r"[\.!?]$", w):
+                bonus += 3.0  # sentence end pause
+            elif re.search(r"[,;:]$", w):
+                bonus += 1.5  # clause pause
+            return base + bonus
+
+        weights = [word_weight(w) for w in words]
+        total_weight = sum(weights) or len(words)
+        # Approximate duration scales with total weight; client rescales to true duration
+        approx_seconds = max(1.8, total_weight / 9.0)
+        timings = []
+        cursor = 0.0
+        for w, wt in zip(words, weights):
+            dur = (wt / total_weight) * approx_seconds
+            start = round(cursor, 3)
+            end = round(cursor + dur, 3)
+            timings.append({"word": w, "start": start, "end": end})
+            cursor += dur
+
+        # Generate audio using pyttsx3 (blocking)
+        try:
+            engine = pyttsx3.init()
+            engine.save_to_file(raw_text, audio_path)
+            engine.runAndWait()
+        except Exception as e:
+            return {"error": f"TTS failed: {str(e)}"}, 500
+
+        return {
+            "audio_url": url_for('static', filename=f"narrations/{audio_filename}"),
+            "timings": timings,
+        }, 200
+    except Exception as e:
+        return {"error": str(e)}, 500
+
 # ---------- Run ----------
 if __name__ == "__main__":
     init_db()

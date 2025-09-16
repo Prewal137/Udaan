@@ -3,41 +3,79 @@
 <head>
   <meta charset="UTF-8">
   <title>AI Flashcards – Udaan</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <style>
+    .deck-wrap { max-width: 1200px; margin: 28px auto; padding: 0 16px; }
+    .toolbar { display:flex; gap:10px; align-items:center; justify-content:center; margin-bottom: 14px; flex-wrap: wrap; }
+    .deck { display:grid; gap:14px; grid-template-columns: repeat(5, 1fr); }
+    @media (max-width: 1200px) { .deck { grid-template-columns: repeat(4, 1fr);} }
+    @media (max-width: 980px)  { .deck { grid-template-columns: repeat(3, 1fr);} }
+    @media (max-width: 740px)  { .deck { grid-template-columns: repeat(2, 1fr);} }
+    @media (max-width: 520px)  { .deck { grid-template-columns: 1fr;} }
+    .flashcard { height: 180px; }
+    .flashcard-front, .flashcard-back { display:flex; flex-direction:column; justify-content:center; }
+    .muted { opacity: 0.55; filter: grayscale(0.3); }
+    .meta { text-align:center; margin-top: 8px; color:#475569; }
+    .tiny { font-size: 12px; color:#64748b; }
+    .actions-row { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-top: 8px; }
+  </style>
 </head>
 <body>
-  <section class="glass-panel fade-in" style="max-width:520px;margin:48px auto;">
-    <h2>Practice with AI Flashcards</h2>
-    <div class="flashcard" onclick="flipCard(this)">
-      <div class="flashcard-inner">
-        <div class="flashcard-front">
-          <h3>What is the capital of India?</h3>
-          <button class="button progress-action" style="margin-top:12px;">Show Answer</button>
-        </div>
-        <div class="flashcard-back">
-          <h3>Answer:</h3>
-          <p>New Delhi</p>
-          <button class="button progress-action" style="margin-top:12px;" onclick="nextCard(event)">Next</button>
+  <section class="glass-panel fade-in deck-wrap">
+    <h2 style="text-align:center;margin-top:0;">Practice with AI Flashcards</h2>
+    <p class="meta">Click any card to flip. Mark known to dim it. Shuffle to randomize.</p>
+
+    <div class="toolbar">
+      <button class="button" onclick="shuffleDeck()">Shuffle</button>
+      <button class="button" onclick="resetKnown()">Reset Known</button>
+      <span class="badge">Total: {{ flashcards|length }}</span>
+    </div>
+
+    <div id="deck" class="deck">
+      {% for fc in flashcards %}
+      <div class="flashcard" tabindex="0" onclick="flipCard(this)">
+        <div class="flashcard-inner">
+          <div class="flashcard-front">
+            <h3 style="margin:0;font-size:16px;line-height:1.3;">{{ fc.question }}</h3>
+            <div class="actions-row">
+              <button class="progress-action" onclick="event.stopPropagation(); markKnown(this)">Mark Known</button>
+            </div>
+          </div>
+          <div class="flashcard-back">
+            <h3 style="margin:0 0 6px 0;">Answer</h3>
+            <p style="margin:0;">{{ fc.answer }}</p>
+            <div class="actions-row">
+              <button class="progress-action" onclick="event.stopPropagation(); markKnown(this)">Mark Known</button>
+            </div>
+          </div>
         </div>
       </div>
+      {% endfor %}
     </div>
-    <div style="margin-top:24px;text-align:center;">
-      <button class="button" onclick="shuffleCards()">Shuffle</button>
-      <span class="badge">Card 1 of 10</span>
-    </div>
+
+    <div class="meta tiny">Showing {{ [flashcards|length, 10]|min }}+ cards per screen on desktop (responsive).</div>
   </section>
+
   <script>
     function flipCard(card) {
-      card.querySelector('.flashcard-inner').style.transform =
-        card.querySelector('.flashcard-inner').style.transform === "rotateY(180deg)" ?
-        "rotateY(0deg)" : "rotateY(180deg)";
+      const inner = card.querySelector('.flashcard-inner');
+      inner.style.transform = (inner.style.transform === 'rotateY(180deg)') ? 'rotateY(0deg)' : 'rotateY(180deg)';
     }
-    function nextCard(e) {
-      e.stopPropagation();
-      alert('Next card function here!');
+    function markKnown(btn){
+      const card = btn.closest('.flashcard');
+      card.classList.toggle('muted');
     }
-    function shuffleCards() {
-      alert('Shuffle cards function here!');
+    function shuffleDeck(){
+      const deck = document.getElementById('deck');
+      const cards = Array.from(deck.children);
+      for(let i = cards.length - 1; i > 0; i--){
+        const j = Math.floor(Math.random() * (i + 1));
+        deck.appendChild(cards[j]);
+        cards.splice(j,1);
+      }
+    }
+    function resetKnown(){
+      document.querySelectorAll('.flashcard.muted').forEach(c => c.classList.remove('muted'));
     }
   </script>
 </body>
