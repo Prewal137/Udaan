@@ -902,7 +902,71 @@ def submit_quiz():
 @login_required(role="teacher")
 def teacher_dashboard():
     user = session.get("user")
-    return render_template("teacher_dashboard.html", name=user.get("name"))
+    conn = get_db()
+    cur = conn.cursor()
+
+    cur.execute("SELECT * FROM students ORDER BY datetime(created_at) DESC")
+    students = cur.fetchall()
+
+    recent_students = []
+    total_uploads = 0
+    total_flashcards = 0
+    total_quizzes = 0
+    total_scores = 0
+
+    for student in students:
+        sid = student["id"]
+        cur.execute("SELECT COUNT(*) FROM uploads WHERE student_id = ?", (sid,))
+        uploads_count = cur.fetchone()[0]
+        total_uploads += uploads_count
+
+        cur.execute("SELECT COALESCE(SUM(num_flashcards), 0) FROM flashcards WHERE student_id = ?", (sid,))
+        fc_sum = cur.fetchone()[0] or 0
+        total_flashcards += fc_sum
+
+        cur.execute("SELECT score, total FROM quiz_attempts WHERE student_id = ?", (sid,))
+        quizzes = cur.fetchall()
+        q_count = len(quizzes)
+        total_quizzes += q_count
+        if q_count:
+            total_scores += sum(q["score"] for q in quizzes) / sum(q["total"] for q in quizzes) if sum(q["total"] for q in quizzes) else 0
+
+        avg_score_pct = 0
+        if q_count and sum(q["total"] for q in quizzes):
+            avg_score_pct = round((sum(q["score"] for q in quizzes) / sum(q["total"] for q in quizzes)) * 100, 1)
+
+        activity_score = uploads_count + fc_sum + q_count
+        recent_students.append({
+            "id": sid,
+            "name": student["name"],
+            "grade": student["grade"] or "-",
+            "uploads": uploads_count,
+            "flashcards": fc_sum,
+            "avg_score_pct": avg_score_pct,
+            "activity": activity_score,
+        })
+
+    # Sort by activity descending and keep top 6 for the dashboard list
+    recent_students.sort(key=lambda s: s["activity"], reverse=True)
+    recent_students = recent_students[:6]
+
+    num_students = len(students)
+    class_avg_pct = 0
+    if num_students and total_quizzes:
+        class_avg_pct = round((total_scores / num_students) * 100, 1)
+
+    conn.close()
+
+    return render_template(
+        "teacher_dashboard.html",
+        name=user.get("name"),
+        recent_students=recent_students,
+        num_students=num_students,
+        total_uploads=total_uploads,
+        total_flashcards=total_flashcards,
+        total_quizzes=total_quizzes,
+        class_avg_pct=class_avg_pct,
+    )
 
 
 @app.route("/upload_books", methods=["GET", "POST"])
@@ -935,34 +999,34 @@ def upload_books():
 def student_progress():
     conn = get_db()
     cur = conn.cursor()
-    
-    cur.execute("SELECT * FROM students")
+
+    filter_id = request.args.get("student_id")
+    if filter_id:
+        cur.execute("SELECT * FROM students WHERE id = ?", (filter_id,))
+    else:
+        cur.execute("SELECT * FROM students")
     students = cur.fetchall()
-    
+
     progress_data = []
     for student in students:
         student_id = student["id"]
-        
-        # Uploaded textbooks
+
         cur.execute("SELECT * FROM uploads WHERE student_id = ?", (student_id,))
         uploads = cur.fetchall()
         total_uploads = len(uploads)
-        
-        # Flashcards
+
         cur.execute("SELECT * FROM flashcards WHERE student_id = ?", (student_id,))
         flashcards = cur.fetchall()
         total_flashcards = sum(f['num_flashcards'] for f in flashcards)
-        
-        # Quiz attempts
+
         cur.execute("SELECT * FROM quiz_attempts WHERE student_id = ?", (student_id,))
         quizzes = cur.fetchall()
         total_quizzes = len(quizzes)
         avg_score = round(sum(q['score'] for q in quizzes) / total_quizzes, 2) if total_quizzes else 0
         completion_rate = f"{total_quizzes}/{total_uploads}" if total_uploads else "0/0"
-        
-        # Reading / Listening stats
+
         num_audiobooks = len([u for u in uploads if u['filename'].endswith('.mp3')])
-        
+
         progress_data.append({
             "student": student,
             "uploads": uploads,
@@ -975,10 +1039,10 @@ def student_progress():
             "completion_rate": completion_rate,
             "num_audiobooks": num_audiobooks
         })
-    
+
     conn.close()
-    
-    return render_template("student_progress.html", progress_data=progress_data)
+
+    return render_template("student_progress.html", progress_data=progress_data, filter_id=filter_id)
 
 # ---------- Logout ----------
 @app.route("/logout")

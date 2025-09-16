@@ -2,52 +2,151 @@
 <html>
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Student Signup</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg-start:#e6f0ff; /* soft blue gradient background */
+      --bg-end:#f6fbff;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#64748b;
+      --border:#e5e7eb;
+      --input-bg:#ffffff; /* white input fields */
+      --primary:#2563eb;
+      --primary-grad-start:#3b82f6;
+      --primary-grad-end:#2563eb;
+      --shadow:0 24px 60px rgba(2,6,23,0.10);
+      --purple:#6d28d9;
+      --blue:#2563eb;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      color:var(--text);
+      background:radial-gradient(1100px 700px at 20% 10%, var(--bg-start) 0%, var(--bg-end) 60%, #fff 100%);
+    }
+
+    .viewport{min-height:100vh;display:grid;place-items:center;padding:24px}
+    .card{width:100%;max-width:720px;background:var(--card);border-radius:16px;box-shadow:var(--shadow);padding:40px}
+
+    .title{margin:0 0 6px 0;font-weight:800;font-size:28px;color:#0b2451}
+    .subtitle{margin:0 0 22px 0;color:var(--muted)}
+
+    .flash{list-style:none;padding:0;margin:0 0 14px 0}
+    .flash li{background:#eef6ff;color:#0b2451;border:1px solid #cfe6ff;padding:10px 12px;border-radius:8px}
+
+    form{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .full{grid-column:1/-1}
+
+    label{display:block;font-weight:600;font-size:14px;color:#334155;margin-bottom:6px}
+    input,select{width:100%;background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:14px 14px;font-size:15px;color:var(--text);transition:border-color .2s ease, box-shadow .2s ease}
+    input:focus,select:focus{outline:none;border-color:#4A90E2;box-shadow:0 0 0 3px rgba(74,144,226,0.18)}
+
+    .password-wrap{position:relative}
+    .toggle-pw{position:absolute;right:12px;top:50%;transform:translateY(-50%);border:none;background:transparent;cursor:pointer;color:#475569;font-weight:700}
+
+    .btn-primary{grid-column:1/-1;appearance:none;border:none;border-radius:12px;padding:14px 18px;font-weight:800;font-size:16px;color:#fff;cursor:pointer;background:linear-gradient(90deg,var(--primary-grad-start),var(--primary-grad-end));box-shadow:0 12px 28px rgba(37,99,235,0.24);transition:filter .2s ease, transform .15s ease}
+    .btn-primary:hover{filter:brightness(1.05);transform:translateY(-1px)}
+
+    .foot{margin-top:14px;text-align:center}
+    .foot a{text-decoration:none}
+    .login-link{color:var(--purple);font-weight:700}
+    .back-link{color:var(--blue);font-weight:700;margin-left:12px}
+    .login-link:hover,.back-link:hover{text-decoration:underline}
+
+    @media (max-width: 760px){
+      .card{padding:28px}
+      form{grid-template-columns:1fr}
+      .btn-primary{grid-column:auto}
+    }
+  </style>
 </head>
 <body>
-  <div class="container form-container">
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        <ul class="flash">
-          {% for msg in messages %}<li>{{ msg }}</li>{% endfor %}
-        </ul>
-      {% endif %}
-    {% endwith %}
+  <div class="viewport">
+    <div class="card">
+      {% with messages = get_flashed_messages() %}
+        {% if messages %}
+          <ul class="flash">
+            {% for msg in messages %}<li>{{ msg }}</li>{% endfor %}
+          </ul>
+        {% endif %}
+      {% endwith %}
 
-    <h2>Student Signup</h2>
-    <form method="POST" action="{{ url_for('signup_student') }}">
-      <label>Name *</label>
-      <input name="name" required>
+      <h2 class="title">Create your account</h2>
+      <p class="subtitle">Fill in your details to sign up.</p>
 
-      <label>Age</label>
-      <input name="age" type="number" min="3">
+      <form method="POST" action="{{ url_for('signup_student') }}">
+        <div class="full">
+          <label>Name *</label>
+          <input name="name" required>
+        </div>
 
-      <label>Grade / Class</label>
-      <input name="grade">
+        <div>
+          <label>Age</label>
+          <input name="age" type="number" min="3">
+        </div>
 
-      <label>Accessibility needs</label>
-      <select name="accessibility">
-        <option value="">None</option>
-        <option value="dyslexia">Dyslexia</option>
-        <option value="vision">Vision impairment</option>
-        <option value="audio">Audio preference</option>
-      </select>
+        <div>
+          <label>Grade / Class</label>
+          <input name="grade">
+        </div>
 
-      <label>Email</label>
-      <input name="email" type="email">
+        <div class="full">
+          <label>Accessibility needs</label>
+          <select name="accessibility">
+            <option value="">None</option>
+            <option value="dyslexia">Dyslexia</option>
+            <option value="vision">Vision impairment</option>
+            <option value="audio">Audio preference</option>
+          </select>
+        </div>
 
-      <label>Phone</label>
-      <input name="phone" type="tel">
+        <div>
+          <label>Email</label>
+          <input name="email" type="email">
+        </div>
 
-      <label>Password *</label>
-      <input type="password" name="password" required>
+        <div>
+          <label>Phone</label>
+          <input name="phone" type="tel">
+        </div>
 
-      <button type="submit">Sign Up</button>
-    </form>
+        <div class="full password-wrap">
+          <label>Password *</label>
+          <input type="password" name="password" id="pw" required>
+          <button class="toggle-pw" type="button" aria-label="Show password" onclick="togglePw()">👁</button>
+        </div>
 
-    <p>Already have an account? <a href="{{ url_for('login_student') }}">Login</a></p>
-    <p><a href="{{ url_for('index') }}">Back</a></p>
+        <button type="submit" class="btn-primary">Sign Up</button>
+      </form>
+
+      <div class="foot">
+        <a class="login-link" href="{{ url_for('login_student') }}">Already have an account? Login</a>
+        <a class="back-link" href="{{ url_for('index') }}">Back</a>
+      </div>
+    </div>
   </div>
+
+  <script>
+    function togglePw(){
+      const pw = document.getElementById('pw');
+      const btn = event.currentTarget;
+      if(pw.type === 'password'){
+        pw.type = 'text';
+        btn.textContent = '🙈';
+        btn.setAttribute('aria-label','Hide password');
+      } else {
+        pw.type = 'password';
+        btn.textContent = '👁';
+        btn.setAttribute('aria-label','Show password');
+      }
+    }
+  </script>
 </body>
 </html>

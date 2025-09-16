@@ -1,89 +1,183 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Teacher/Parent Dashboard</title>
-  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teacher Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    body {
-      font-family: 'Lexend', Arial, sans-serif;
-      background: #f5f5f5; 
-      margin: 0;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
+    :root{
+      --bg:#f7f9fc;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#64748b;
+      --border:#e5e7eb;
+      --primary:#2563eb;
+      --shadow:0 16px 40px rgba(2,6,23,0.08);
+      --shadow-soft:0 8px 24px rgba(2,6,23,0.06);
+      --danger:#ef4444;
     }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
 
-    .container {
-      max-width: 600px;
-      width: 90%;
-      padding: 40px 30px;
-      background: #ffffff;
-      border-radius: 16px;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-      text-align: center;
-      color: #333;
+    /* Header */
+    .header{position:sticky;top:0;background:rgba(247,249,252,0.8);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);z-index:10}
+    .header-inner{max-width:1200px;margin:0 auto;padding:16px 20px;display:flex;align-items:center;justify-content:space-between}
+    .title{margin:0;font-size:26px;font-weight:800}
+    .icons{display:flex;gap:10px}
+    .icon{width:36px;height:36px;border-radius:10px;background:#e2e8f0;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-soft)}
+
+    /* Main grid */
+    .container{max-width:1200px;margin:0 auto;padding:24px}
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow-soft)}
+    .card-header{padding:16px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+    .card-title{margin:0;font-weight:800;font-size:18px}
+    .card-sub{margin:0;color:var(--muted);font-size:14px}
+    .card-body{padding:18px}
+
+    /* Spans */
+    .span-6{grid-column:span 6}
+    .span-4{grid-column:span 4}
+    .span-3{grid-column:span 3}
+    .span-12{grid-column:span 12}
+
+    /* Welcome */
+    .welcome{display:flex;align-items:center;gap:16px}
+    .avatar{width:54px;height:54px;border-radius:14px;background:#e2e8f0;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-soft)}
+    .avatar::before{content:'🤖';font-size:26px}
+
+    /* Upload */
+    .upload-box{display:grid;place-items:center;text-align:center;padding:18px}
+    .upload-icon{font-size:40px;margin-bottom:8px}
+    .btn{appearance:none;border:none;border-radius:12px;padding:12px 16px;font-weight:800;cursor:pointer}
+    .btn-primary{background:linear-gradient(90deg,#3b82f6,#2563eb);color:#fff;box-shadow:0 12px 28px rgba(37,99,235,0.24)}
+
+    /* Notes placeholder */
+    .line{height:10px;background:#f1f5f9;border-radius:8px;margin:8px 0}
+
+    /* Charts placeholders */
+    .chart{height:200px;display:flex;align-items:center;justify-content:center;color:var(--muted);border:1px dashed #e5e7eb;border-radius:12px;background:#f8fafc}
+
+    /* Student list */
+    .list{display:grid;gap:10px}
+    .row{display:flex;align-items:center;gap:12px;padding:10px;border:1px solid var(--border);border-radius:12px;background:#fff}
+    .avatar-sm{width:34px;height:34px;border-radius:8px;background:#e2e8f0;display:flex;align-items:center;justify-content:center}
+
+    /* Footer links */
+    .footer{padding:24px 20px;text-align:center}
+    .logout{color:var(--danger);text-decoration:none;font-weight:700}
+    .logout:hover{text-decoration:underline}
+
+    @media (max-width: 1080px){
+      .span-6{grid-column:span 12}
+      .span-4{grid-column:span 6}
+      .span-3{grid-column:span 6}
     }
-
-    h1 {
-      margin-bottom: 15px;
-      font-size: 2rem;
-      color: #222;
-    }
-
-    p {
-      margin-bottom: 30px;
-      font-size: 1.1rem;
-      color: #555;
-    }
-
-    .btn {
-      display: inline-block;
-      margin: 15px;
-      padding: 14px 28px;
-      font-size: 16px;
-      font-weight: 600;
-      border-radius: 10px;
-      border: none;
-      cursor: pointer;
-      background: #4CAF50;
-      color: white;
-      text-decoration: none;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-
-    .btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(0,0,0,0.15);
-    }
-
-    .logout {
-      display: block;
-      margin-top: 40px;
-      font-size: 14px;
-      color: #e63946;
-      text-decoration: none;
-      transition: color 0.3s;
-    }
-
-    .logout:hover {
-      color: #ff4f5a;
-      text-decoration: underline;
+    @media (max-width: 720px){
+      .span-4,.span-3{grid-column:span 12}
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Welcome, {{ name }} 👩‍🏫</h1>
-    <p>Select an option below:</p>
-    
-    <a href="{{ url_for('upload_books') }}" class="btn">📚 Upload / View Books</a>
-    <a href="{{ url_for('student_progress') }}" class="btn">📊 View Student Progress</a>
-    
-    <a href="{{ url_for('logout') }}" class="logout">🚪 Logout</a>
-  </div>
+  <header class="header">
+    <div class="header-inner">
+      <h1 class="title">Teacher Dashboard</h1>
+      <div class="icons">
+        <div class="icon">🙂</div>
+        <div class="icon">⚙️</div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="grid">
+      <!-- Welcome card spanning two columns -->
+      <section class="card span-6">
+        <div class="card-body welcome">
+          <div class="avatar"></div>
+          <div>
+            <h2 class="card-title" style="margin:0">Welcome, {{ name }}! 👋</h2>
+            <p class="card-sub">Here's an overview of your classes.</p>
+          </div>
+        </div>
+      </section>
+      <section class="card span-6">
+        <div class="card-header">
+          <h3 class="card-title">Upload Book</h3>
+        </div>
+        <div class="card-body upload-box">
+          <div class="upload-icon">📤</div>
+          <p class="card-sub" style="margin:4px 0 12px 0">PDF or other formats</p>
+          <a class="btn btn-primary" href="{{ url_for('upload_books') }}">Go to Uploads</a>
+        </div>
+      </section>
+
+      <section class="card span-4">
+        <div class="card-header">
+          <h3 class="card-title">Notes & Feedback</h3>
+        </div>
+        <div class="card-body">
+          <div class="line" style="width:90%"></div>
+          <div class="line" style="width:70%"></div>
+          <div class="line" style="width:82%"></div>
+          <div class="line" style="width:60%"></div>
+        </div>
+      </section>
+
+      <section class="card span-4">
+        <div class="card-header">
+          <h3 class="card-title">Student Progress</h3>
+        </div>
+        <div class="card-body">
+          <div class="chart">Avg score: {{ class_avg_pct or 0 }}% • Students: {{ num_students or 0 }} • Quizzes: {{ total_quizzes or 0 }}</div>
+        </div>
+      </section>
+
+      <section class="card span-4">
+        <div class="card-header">
+          <h3 class="card-title">Student List</h3>
+          <a href="{{ url_for('student_progress') }}" style="text-decoration:none;color:var(--primary);font-weight:700">View all →</a>
+        </div>
+        <div class="card-body list">
+          {% if recent_students %}
+            {% for s in recent_students %}
+              <a href="{{ url_for('student_progress') }}?student_id={{ s.id }}" style="text-decoration:none;color:inherit">
+                <div class="row"><div class="avatar-sm">🧑</div><div><strong>{{ s.name }}</strong><div class="card-sub">Grade {{ s.grade }} • {{ s.uploads }} uploads • {{ s.flashcards }} flashcards • {{ s.avg_score_pct }}%</div></div></div>
+              </a>
+            {% endfor %}
+          {% else %}
+            <div class="card-sub">No students yet.</div>
+          {% endif %}
+        </div>
+      </section>
+
+      <section class="card span-6">
+        <div class="card-header">
+          <h3 class="card-title">Quick Insights</h3>
+        </div>
+        <div class="card-body">
+          <div class="chart">Uploads: {{ total_uploads or 0 }} • Flashcards: {{ total_flashcards or 0 }}</div>
+        </div>
+      </section>
+
+      <section class="card span-6">
+        <div class="card-header">
+          <h3 class="card-title">Student Analytics</h3>
+          <a href="{{ url_for('student_progress') }}" style="text-decoration:none;color:var(--primary);font-weight:700">View Details →</a>
+        </div>
+        <div class="card-body">
+          <div class="chart">Class performance over time</div>
+        </div>
+      </section>
+
+      <div class="span-12 footer">
+        <a class="logout" href="{{ url_for('logout') }}">Logout</a>
+      </div>
+    </div>
+  </main>
 </body>
 </html>

@@ -4,290 +4,288 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Dashboard - Udaan</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <!-- Modernized student dashboard with better UX and accessibility -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root{
+            --bg:#f7fbff;
+            --panel:#ffffff;
+            --muted:#64748b;
+            --text:#0f172a;
+            --border:#e5e7eb;
+            --primary:#2563eb;
+            --primary-500:#3b82f6;
+            --green:#10b981;
+            --shadow:0 20px 60px rgba(2,6,23,0.10);
+            --shadow-soft:0 8px 28px rgba(2,6,23,0.06);
+        }
+        *{box-sizing:border-box}
+        html,body{height:100%}
+        body{margin:0;font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
+
+        .layout{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+        /* Sidebar */
+        .sidebar{background:#eef4ff;border-right:1px solid #dbeafe;display:flex;flex-direction:column;}
+        .nav-top{padding:14px 16px;border-bottom:1px solid #dbeafe;display:flex;gap:10px;justify-content:space-between;flex-wrap:wrap}
+        .nav-top a{color:#1e3a8a;text-decoration:none;font-weight:600;padding:8px 10px;border-radius:8px}
+        .nav-top a:hover{background:#e0ecff}
+        .greeting{padding:18px}
+        .greeting .hello{display:flex;align-items:center;gap:12px}
+        .robot{width:44px;height:44px;border-radius:12px;background:#e2e8f0;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-soft)}
+        .robot::before{content:'🤖';font-size:22px}
+        .greeting h2{margin:8px 0 4px 0;font-size:18px}
+        .greeting p{margin:0;color:var(--muted);font-size:14px}
+        .quick{padding:0 18px 18px 18px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        .quick a,.quick button{appearance:none;border:1px solid #e2e8f0;background:#fff;border-radius:14px;padding:14px;display:flex;gap:10px;align-items:center;justify-content:center;cursor:pointer;text-decoration:none;color:#0f172a;font-weight:700;box-shadow:var(--shadow-soft);transition:transform .15s ease, box-shadow .15s ease}
+        .quick a:hover,.quick button:hover{transform:translateY(-2px);box-shadow:0 14px 32px rgba(2,6,23,.12)}
+        .progress{padding:0 18px 18px 18px}
+        .progress h3{margin:0 0 10px 0;font-size:14px;color:#1f2937}
+        .bar{height:10px;background:#e5e7eb;border-radius:999px;overflow:hidden}
+        .fill{height:100%;width:48%;background:linear-gradient(90deg,var(--primary-500),#60a5fa);border-radius:999px}
+
+        /* Textbook preview placeholder */
+        .preview{margin:12px 18px 18px 18px;border:1px solid #e2e8f0;border-radius:16px;background:#fff;box-shadow:var(--shadow-soft);overflow:hidden}
+        .preview .head{padding:12px 14px;border-bottom:1px solid #e5e7eb;font-weight:700;color:#1f2937}
+        .preview .body{display:grid;grid-template-columns:140px 1fr;min-height:220px}
+        .toc{border-right:1px solid #e5e7eb;padding:12px}
+        .toc h4{margin:0 0 8px 0;font-size:13px;color:#334155}
+        .toc ul{list-style:none;padding:0;margin:0;display:grid;gap:6px}
+        .toc li{padding:6px 8px;border-radius:8px;cursor:default;background:#f8fafc;border:1px dashed #e5e7eb;color:#475569}
+        .doc{padding:12px;display:grid;gap:10px}
+        .doc .tabs{display:flex;gap:8px}
+        .chip{padding:8px 10px;border-radius:999px;border:1px solid #e5e7eb;background:#f8fafc;color:#334155;font-weight:600;font-size:12px}
+        .doc h3{margin:6px 0 0 0}
+        .doc .actions{display:flex;gap:8px}
+        .btn-sm{padding:8px 10px;border-radius:10px;border:1px solid #e5e7eb;background:#fff;cursor:pointer}
+
+        /* Main content */
+        .main{padding:28px;display:grid;gap:22px}
+        .main-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap}
+        .title{font-size:28px;margin:0}
+        .subtitle{margin:2px 0 0 0;color:var(--muted)}
+        .logout{color:#1d4ed8;text-decoration:none;font-weight:600}
+        .logout:hover{text-decoration:underline}
+
+        .card{background:var(--panel);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow-soft)}
+        .card .card-header{padding:18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+        .card .card-header h3{margin:0;font-size:18px}
+        .card .card-content{padding:18px}
+
+        /* Upload Section */
+        .upload-grid{display:grid;grid-template-columns:1fr;gap:14px}
+        .dropzone{border:2px dashed #93c5fd;border-radius:14px;padding:24px;text-align:center;background:linear-gradient(180deg,#f8fbff,#ffffff)}
+        .dropzone p{margin:8px 0;color:#475569}
+        .file-row{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap}
+        .file-row input[type=file]{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px}
+        .btn-primary{appearance:none;border:none;border-radius:12px;padding:12px 18px;background:linear-gradient(90deg,var(--primary-500),#2563eb);color:#fff;font-weight:800;cursor:pointer;box-shadow:0 12px 28px rgba(37,99,235,0.24)}
+        .current-file{margin-top:10px;text-align:center;color:#334155}
+
+        /* Learning Features */
+        .features{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+        .feature{border:1px solid var(--border);border-radius:14px;background:#fff;padding:16px;box-shadow:var(--shadow-soft)}
+        .feature h4{margin:0 0 8px 0}
+        .feature p{margin:0 0 12px 0;color:#475569}
+        .feature form,.feature a{display:block}
+        .feature button,.feature a.btn{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #e2e8f0;background:#f8fafc;cursor:pointer;text-align:center;text-decoration:none;color:#0f172a;font-weight:700}
+        .feature button:hover,.feature a.btn:hover{background:#eef2ff}
+
+        @media (max-width: 1024px){
+            .layout{grid-template-columns:220px 1fr}
+            .preview .body{grid-template-columns:1fr}
+            .toc{border-right:0;border-bottom:1px solid #e5e7eb}
+        }
+        @media (max-width: 760px){
+            .layout{grid-template-columns:1fr}
+            .sidebar{position:relative}
+        }
+    </style>
 </head>
-<body class="min-h-screen bg-gradient">
-    <!-- Skip to main content -->
-    <a href="#main-content" class="skip-link">Skip to main content</a>
-    
-    <!-- Header -->
-    <header class="header">
-        <div class="container py-4">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <div class="h-10 w-10 bg-primary rounded-lg flex items-center justify-center">
-                        <i data-lucide="graduation-cap" class="h-6 w-6 text-primary-foreground"></i>
-                    </div>
+<body>
+    <div class="layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <nav class="nav-top">
+                <a href="#">Dashboard</a>
+                <a href="{{ url_for('library') }}">Textbooks</a>
+                <a href="#">Games</a>
+                <a href="{{ url_for('dyslexic_friendly') }}" onclick="event.preventDefault(); document.getElementById('openDysForm').submit();">Accessibility</a>
+                <a href="#">Support</a>
+            </nav>
+            <div class="greeting">
+                <div class="hello">
+                    <div class="robot"></div>
                     <div>
-                        <h1 class="text-2xl font-bold text-foreground font-work-sans">Student Dashboard</h1>
-                        <p class="text-sm text-muted-foreground">Welcome back to your learning journey</p>
+                        <div style="font-weight:800">Hello {{ name or 'Student' }}!</div>
+                        <p>Let's continue your learning today.</p>
                     </div>
                 </div>
-                <a href="{{ url_for('logout') }}" class="btn btn-outline gap-2">
-                    <i data-lucide="log-out" class="h-4 w-4"></i>
-                    Logout
-                </a>
             </div>
-        </div>
-    </header>
-
-    <main id="main-content" class="container py-8">
-        <!-- Upload Section -->
-        <section class="mb-12">
-            <div class="card max-w-2xl mx-auto">
-                <div class="card-header text-center">
-                    <div class="feature-icon primary mx-auto mb-4">
-                        <i data-lucide="upload" class="h-8 w-8"></i>
+            <div class="quick">
+                <a href="{{ url_for('library') }}">📚 My Textbooks</a>
+                <button onclick="document.getElementById('listenForm').submit()">🎧 Listen</button>
+                <button onclick="document.getElementById('summaryForm').submit()">📝 Summaries</button>
+                <button onclick="document.getElementById('quizForm').submit()">🎮 Games & Quizzes</button>
+            </div>
+            <div class="progress">
+                <h3>Progress</h3>
+                <div class="bar"><div class="fill"></div></div>
+            </div>
+            <div class="preview">
+                <div class="head">Textbook Section</div>
+                <div class="body">
+                    <div class="toc">
+                        <h4>Table of contents</h4>
+                        <ul>
+                            <li>Chapter 1</li>
+                            <li>Chapter 2</li>
+                            <li>Chapter 3</li>
+                            <li>Chapter 4</li>
+                        </ul>
                     </div>
-                    <h2 class="card-title font-work-sans">📚 Upload Your Textbook</h2>
-                    <p class="card-description">
-                        Upload PDF, DOCX, or TXT files to get started with AI-powered learning features
-                    </p>
+                    <div class="doc">
+                        <div class="tabs">
+                            <span class="chip">Normal View</span>
+                            <span class="chip">Dyslexia-Friendly View</span>
+                            <span class="chip">Simplified</span>
+                        </div>
+                        <h3>Textbook Title</h3>
+                        <div class="actions">
+                            <button class="btn-sm">Listen</button>
+                            <button class="btn-sm">Summ</button>
+                            <button class="btn-sm">Trans-</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main">
+            <div class="main-header">
+                <div>
+                    <h1 class="title">Student Dashboard</h1>
+                    <p class="subtitle">Welcome back to your learning journey</p>
+                </div>
+                <a class="logout" href="{{ url_for('logout') }}">Logout →</a>
+            </div>
+
+            <!-- Upload Section -->
+            <section class="card">
+                <div class="card-header">
+                    <h3>📤 Upload Your Textbook</h3>
                 </div>
                 <div class="card-content">
-                    <form action="{{ url_for('upload_textbook') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
-                        <div class="border-2 border-dashed border-primary rounded-lg p-8 text-center bg-gradient-primary">
-                            <i data-lucide="file-plus" class="h-12 w-12 text-primary mx-auto mb-4"></i>
-                            <input type="file" name="textbook" accept=".pdf,.docx,.txt" required 
-                                   class="w-full p-2 border rounded-lg mb-4 bg-background">
-                            <p class="text-sm text-muted-foreground mb-4">
-                                Drag and drop your file here, or click to browse
-                            </p>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-full btn-lg">
-                            <i data-lucide="upload" class="h-5 w-5"></i>
-                            Upload Textbook
-                        </button>
-                    </form>
-                </div>
-            </div>
-
-            <!-- Current file indicator -->
-            {% if session.get('uploaded_file') %}
-            <div class="text-center mt-6">
-                <div class="inline-flex items-center gap-2 bg-card px-4 py-2 rounded-lg border">
-                    <i data-lucide="file-check" class="h-4 w-4 text-primary"></i>
-                    <span class="text-sm">Current Textbook: <strong>{{ session['uploaded_file'] }}</strong></span>
-                </div>
-            </div>
-            {% endif %}
-        </section>
-
-        <!-- Features Section -->
-        <section class="mb-12">
-            <div class="text-center mb-8">
-                <h2 class="text-3xl font-bold text-foreground mb-4 font-work-sans">✨ Learning Features</h2>
-                <p class="text-lg text-muted-foreground">
-                    Explore powerful tools designed to enhance your learning experience
-                </p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Library -->
-                <div class="card hover:shadow-lg hover:-translate-y-2 transition-all duration-300">
-                    <div class="card-header text-center">
-                        <div class="feature-icon primary">
-                            <i data-lucide="library" class="h-6 w-6"></i>
-                        </div>
-                        <h3 class="card-title">📚 Library</h3>
-                    </div>
-                    <div class="card-content">
-                        <p class="card-description text-center mb-4">
-                            Access your uploaded textbooks and study materials
-                        </p>
-                        <a href="{{ url_for('library') }}" class="btn btn-primary w-full">
-                            Open Library
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Audio Narration -->
-                <div class="card hover:shadow-lg hover:-translate-y-2 transition-all duration-300">
-                    <div class="card-header text-center">
-                        <div class="feature-icon secondary">
-                            <i data-lucide="headphones" class="h-6 w-6"></i>
-                        </div>
-                        <h3 class="card-title">🎧 Audio Narration</h3>
-                    </div>
-                    <div class="card-content">
-                        <p class="card-description text-center mb-4">
-                            Listen to your textbooks with high-quality text-to-speech
-                        </p>
-                        <form action="{{ url_for('audio_narration') }}" method="POST">
-                            <button type="submit" class="btn btn-secondary w-full">
-                                Generate Audio
-                            </button>
+                    <div class="upload-grid">
+                        <form action="{{ url_for('upload_textbook') }}" method="POST" enctype="multipart/form-data">
+                            <div class="dropzone" ondragover="event.preventDefault()" ondrop="handleDrop(event)">
+                                <p><strong>Upload PDF, DOCX, or TXT</strong> to get started with AI-powered learning features.</p>
+                                <div class="file-row">
+                                    <input type="file" name="textbook" accept=".pdf,.docx,.txt" required>
+                                    <button type="submit" class="btn-primary">Upload Textbook</button>
+                                </div>
+                                <p>Drag and drop your file here, or click to browse</p>
+                            </div>
                         </form>
+                        {% if session.get('uploaded_file') %}
+                        <div class="current-file"><strong>Current Textbook:</strong> {{ session['uploaded_file'] }}</div>
+                        {% endif %}
                     </div>
                 </div>
+            </section>
 
-                <!-- AI Summary -->
-                <div class="card hover:shadow-lg hover:-translate-y-2 transition-all duration-300">
-                    <div class="card-header text-center">
-                        <div class="feature-icon accent">
-                            <i data-lucide="file-text" class="h-6 w-6"></i>
-                        </div>
-                        <h3 class="card-title">✍️ AI Summary</h3>
-                    </div>
-                    <div class="card-content">
-                        <p class="card-description text-center mb-4">
-                            Get simplified summaries of complex topics
-                        </p>
-                        <form action="{{ url_for('generate_summary') }}" method="POST">
-                            <button type="submit" class="btn btn-outline w-full">
-                                Generate Summary
-                            </button>
-                        </form>
-                    </div>
-                </div>
-
-                <!-- Translation -->
-                <div class="card hover:shadow-lg hover:-translate-y-2 transition-all duration-300">
-                    <div class="card-header text-center">
-                        <div class="feature-icon chart-3">
-                            <i data-lucide="languages" class="h-6 w-6"></i>
-                        </div>
-                        <h3 class="card-title">🌍 Translation</h3>
-                    </div>
-                    <div class="card-content">
-                        <p class="card-description text-center mb-4">
-                            Translate content to Hindi and other languages
-                        </p>
-                        <form action="{{ url_for('translate_text') }}" method="POST">
-                            <button type="submit" class="btn btn-outline w-full">
-                                Translate Text
-                            </button>
-                        </form>
-                    </div>
-                </div>
-
-                <!-- Dyslexic-Friendly -->
-                <div class="card hover:shadow-lg hover:-translate-y-2 transition-all duration-300">
-                    <div class="card-header text-center">
-                        <div class="feature-icon chart-5">
-                            <i data-lucide="accessibility" class="h-6 w-6"></i>
-                        </div>
-                        <h3 class="card-title">🔤 Dyslexic Reader</h3>
-                    </div>
-                    <div class="card-content">
-                        <p class="card-description text-center mb-4">
-                            Special reading mode for learning disabilities
-                        </p>
-                        <form action="{{ url_for('dyslexic_friendly') }}" method="POST" target="_blank">
-                            <button type="submit" class="btn btn-outline w-full">
-                                Open Reader
-                            </button>
-                        </form>
-                    </div>
-                </div>
-
-                <!-- Flashcards -->
-                <div class="card hover:shadow-lg hover:-translate-y-2 transition-all duration-300">
-                    <div class="card-header text-center">
-                        <div class="feature-icon chart-1">
-                            <i data-lucide="layers" class="h-6 w-6"></i>
-                        </div>
-                        <h3 class="card-title">🃏 Flashcards</h3>
-                    </div>
-                    <div class="card-content">
-                        <p class="card-description text-center mb-4">
-                            Auto-generated flashcards from your materials
-                        </p>
-                        <form action="{{ url_for('generate_flashcards') }}" method="POST">
-                            <button type="submit" class="btn btn-outline w-full">
-                                Create Flashcards
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Audio Player Section -->
-        {% if audio_file %}
-        <section class="mb-12">
-            <div class="card max-w-3xl mx-auto">
-                <div class="card-header text-center">
-                    <div class="feature-icon secondary mx-auto mb-4">
-                        <i data-lucide="volume-2" class="h-8 w-8"></i>
-                    </div>
-                    <h3 class="card-title font-work-sans">🎧 Audio Narration</h3>
-                    <p class="card-description">Listen to your textbook content</p>
+            <!-- Learning Features -->
+            <section class="card">
+                <div class="card-header">
+                    <h3>✨ Learning Features</h3>
                 </div>
                 <div class="card-content">
-                    <audio controls class="w-full" style="height: 54px;">
+                    <p style="margin-top:0;color:#475569">Explore powerful tools designed to enhance your learning experience.</p>
+                    <div class="features">
+                        <div class="feature">
+                            <h4>📚 Library</h4>
+                            <p>Access your uploaded textbooks and study materials.</p>
+                            <a class="btn" href="{{ url_for('library') }}">Open Library</a>
+                        </div>
+                        <div class="feature">
+                            <h4>🎧 Audio Narration</h4>
+                            <p>Listen to your textbooks with high-quality text-to-speech.</p>
+                            <form id="listenForm" action="{{ url_for('audio_narration') }}" method="POST">
+                                <button type="submit">Generate Audio</button>
+                            </form>
+                        </div>
+                        <div class="feature">
+                            <h4>✍️ AI Summary</h4>
+                            <p>Get simplified summaries of complex topics.</p>
+                            <form id="summaryForm" action="{{ url_for('generate_summary') }}" method="POST">
+                                <button type="submit">Generate Summary</button>
+                            </form>
+                        </div>
+                        <div class="feature">
+                            <h4>🌍 Translation</h4>
+                            <p>Translate content to Hindi and other languages.</p>
+                            <form action="{{ url_for('translate_text') }}" method="POST">
+                                <button type="submit">Translate Text</button>
+                            </form>
+                        </div>
+                        <div class="feature">
+                            <h4>🔤 Dyslexic Reader</h4>
+                            <p>Special reading mode for learning disabilities.</p>
+                            <form id="openDysForm" action="{{ url_for('dyslexic_friendly') }}" method="POST" target="_blank">
+                                <button type="submit">Open Reader</button>
+                            </form>
+                        </div>
+                        <div class="feature">
+                            <h4>🃏 Flashcards</h4>
+                            <p>Auto-generated flashcards from your materials.</p>
+                            <form id="quizForm" action="{{ url_for('generate_flashcards') }}" method="POST">
+                                <button type="submit">Create Flashcards</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {% if audio_file %}
+            <section class="card">
+                <div class="card-header"><h3>🎧 Audio Narration</h3></div>
+                <div class="card-content">
+                    <audio controls class="w-full" style="width:100%;height:54px">
                         <source src="{{ url_for('static', filename='narrations/' + audio_file) }}" type="audio/mpeg">
                         Your browser does not support the audio element.
                     </audio>
                 </div>
-            </div>
-        </section>
-        {% endif %}
+            </section>
+            {% endif %}
 
-        <!-- Summary Display -->
-        {% if summary %}
-        <section class="mb-12">
-            <div class="card max-w-4xl mx-auto">
-                <div class="card-header">
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="feature-icon accent">
-                            <i data-lucide="file-text" class="h-6 w-6"></i>
-                        </div>
-                        <h3 class="card-title font-work-sans">✍️ AI-Generated Summary</h3>
-                    </div>
-                </div>
+            {% if summary %}
+            <section class="card">
+                <div class="card-header"><h3>✍️ AI-Generated Summary</h3></div>
                 <div class="card-content">
-                    <div class="bg-gradient-muted p-6 rounded-lg">
-                        <p class="text-base leading-relaxed">{{ summary }}</p>
-                    </div>
+                    <div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:12px;padding:16px;line-height:1.7">{{ summary }}</div>
                 </div>
-            </div>
-        </section>
-        {% endif %}
+            </section>
+            {% endif %}
 
-        <!-- Translation Downloads -->
-        {% if hindi_file %}
-        <section class="mb-12">
-            <div class="card max-w-2xl mx-auto text-center">
-                <div class="card-header">
-                    <div class="feature-icon chart-3 mx-auto mb-4">
-                        <i data-lucide="download" class="h-8 w-8"></i>
-                    </div>
-                    <h3 class="card-title font-work-sans">🌍 Translation Ready</h3>
-                    <p class="card-description">Your translated content is ready for download</p>
+            {% if hindi_file %}
+            <section class="card">
+                <div class="card-header"><h3>🌍 Translation Ready</h3></div>
+                <div class="card-content" style="text-align:center">
+                    <a href="{{ url_for('static', filename='translations/' ~ hindi_file) }}" download class="btn-primary" style="display:inline-block;text-decoration:none">Download Hindi PDF</a>
                 </div>
-                <div class="card-content">
-                    <a href="{{ url_for('static', filename='translations/' ~ hindi_file) }}" 
-                       download class="btn btn-primary btn-lg gap-2">
-                        <i data-lucide="download" class="h-5 w-5"></i>
-                        Download Hindi PDF
-                    </a>
-                </div>
-            </div>
-        </section>
-        {% endif %}
-    </main>
+            </section>
+            {% endif %}
+        </main>
+    </div>
 
-    <!-- Added Lucide icons and modern interactivity -->
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script>
-        lucide.createIcons();
-        
-        // Add hover effects and animations
-        document.addEventListener('DOMContentLoaded', function() {
-            const cards = document.querySelectorAll('.card');
-            cards.forEach(card => {
-                card.addEventListener('mouseenter', function() {
-                    this.style.borderColor = 'var(--primary)';
-                });
-                card.addEventListener('mouseleave', function() {
-                    this.style.borderColor = 'var(--border)';
-                });
-            });
-        });
+        function handleDrop(e){
+            e.preventDefault();
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            const input = document.querySelector('input[type=file][name=textbook]');
+            if(files && files.length){ input.files = files; }
+        }
     </script>
 </body>
 </html>
