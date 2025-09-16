@@ -1,18 +1,231 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>Choose role</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Udaan – Transform Learning</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --blue-900: #002366;
+      --blue-600: #3B82F6;
+      --green-500: #10B981;
+      --glass-bg: rgba(255, 255, 255, 0.40);
+      --glass-brd: rgba(255, 255, 255, 0.60);
+      --card-shadow: 0 12px 40px rgba(59, 130, 246, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: 'Manrope', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: #0f172a;
+      background: radial-gradient(1200px 800px at 20% 10%, #e9f3ff 0%, #f6fbff 30%, #ffffff 70%);
+      overflow-x: hidden;
+    }
+
+    /* Floating background shapes */
+    .bg-shapes {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 0;
+    }
+    .shape {
+      position: absolute;
+      border-radius: 50% / 40% 60% 60% 40%;
+      filter: blur(18px);
+      opacity: 0.25;
+      animation: float 18s ease-in-out infinite;
+    }
+    .shape.one { width: 360px; height: 360px; left: -80px; top: -60px; background: #93c5fd; }
+    .shape.two { width: 300px; height: 300px; right: -60px; top: 120px; background: #a7f3d0; animation-delay: 3s; }
+    .shape.three { width: 260px; height: 260px; left: 40%; bottom: -80px; background: #bfdbfe; animation-delay: 6s; }
+    @keyframes float {
+      0%, 100% { transform: translateY(0) translateX(0) scale(1); }
+      50% { transform: translateY(-16px) translateX(8px) scale(1.03); }
+    }
+
+    /* Centering container */
+    .viewport {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 40px 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .stack {
+      width: 100%;
+      max-width: 1100px;
+      display: grid;
+      gap: 28px;
+    }
+
+    /* Glass panel */
+    .glass {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-brd);
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: 0 8px 30px rgba(15, 23, 42, 0.08);
+    }
+
+    /* Header section */
+    .header {
+      padding: 32px 28px;
+      text-align: center;
+    }
+    .title {
+      margin: 0 0 10px 0;
+      font-weight: 800;
+      font-size: clamp(28px, 4.2vw, 44px);
+      color: var(--blue-900);
+      letter-spacing: 0.3px;
+    }
+    .description {
+      margin: 0 auto;
+      max-width: 900px;
+      font-size: clamp(15px, 2.2vw, 18px);
+      color: #334155;
+      line-height: 1.7;
+    }
+    .subtitle {
+      margin: 18px 0 0 0;
+      font-weight: 700;
+      color: #0f3a8a;
+      font-size: clamp(20px, 2.8vw, 26px);
+    }
+
+    /* Feature cards */
+    .cards {
+      display: flex;
+      gap: 16px;
+      padding: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .card {
+      flex: 1 1 230px;
+      min-width: 220px;
+      max-width: 260px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+      border-radius: 16px;
+      border: 1px solid var(--glass-brd);
+      background: var(--glass-bg);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: var(--card-shadow);
+    }
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 16px 48px rgba(59, 130, 246, 0.22);
+      border-color: rgba(255,255,255,0.9);
+    }
+    .icon {
+      font-size: 28px;
+      margin-bottom: 12px;
+    }
+    .card p {
+      margin: 0;
+      color: #1f2a44;
+      font-weight: 600;
+    }
+
+    /* Role buttons */
+    .roles {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      padding: 8px 16px 22px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      appearance: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 12px 22px;
+      border-radius: 12px;
+      color: #fff;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      text-decoration: none;
+      border: 1px solid rgba(255,255,255,0.35);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
+      transition: transform .2s ease, filter .2s ease, box-shadow .2s ease;
+      cursor: pointer;
+    }
+    .btn:hover { transform: translateY(-2px); filter: brightness(1.05); box-shadow: 0 14px 28px rgba(15, 23, 42, 0.16); }
+    .btn:active { transform: translateY(0px) scale(0.98); }
+    .btn:focus-visible { outline: 3px solid #93c5fd; outline-offset: 2px; }
+    .btn-student { background: var(--blue-600); }
+    .btn-teacher { background: var(--green-500); }
+
+    /* Layout alignment for sections */
+    .section { display: grid; gap: 14px; }
+
+    /* Small footer note */
+    .footnote { text-align:center; color:#64748b; font-size: 13px; padding-bottom: 8px; }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Welcome 👋</h1>
-    <p>Choose your role:</p>
-    <div class="role-buttons">
-      <a class="btn" href="{{ url_for('role_page', role='student') }}">Student</a>
-      <a class="btn" href="{{ url_for('role_page', role='teacher') }}">Teacher / Parent</a>
-    </div>
+  <div class="bg-shapes" aria-hidden="true">
+    <div class="shape one"></div>
+    <div class="shape two"></div>
+    <div class="shape three"></div>
   </div>
+
+  <main class="viewport">
+    <div class="stack">
+      <!-- Header Section -->
+      <section class="glass header section">
+        <h1 class="title">Transform Learning with AI-Powered Education</h1>
+        <p class="description">Udaan makes education accessible for students with learning disabilities through innovative technology, personalized learning paths, and comprehensive support tools.</p>
+        <h2 class="subtitle">Powerful Features for Every Learning Style</h2>
+      </section>
+
+      <!-- Feature Cards Section -->
+      <section class="glass section" style="padding: 18px;">
+        <div class="cards">
+          <div class="card" tabindex="0" aria-label="AI summaries & audio narration">
+            <div class="icon">📚</div>
+            <p>AI summaries & audio narration</p>
+          </div>
+          <div class="card" tabindex="0" aria-label="High-quality text-to-speech for textbooks">
+            <div class="icon">🎧</div>
+            <p>High-quality text-to-speech for textbooks</p>
+          </div>
+          <div class="card" tabindex="0" aria-label="Content translation, Hindi font support">
+            <div class="icon">🌏</div>
+            <p>Content translation, Hindi font support</p>
+          </div>
+          <div class="card" tabindex="0" aria-label="Special reading modes generated automatically">
+            <div class="icon">💙</div>
+            <p>Special reading modes generated automatically</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Role Selection Section -->
+      <section class="glass section" style="padding: 18px;">
+        <div class="roles">
+          <a class="btn btn-student" href="{{ url_for('role_page', role='student') }}">I'm a Student</a>
+          <a class="btn btn-teacher" href="{{ url_for('role_page', role='teacher') }}">I'm a Teacher/Parent</a>
+        </div>
+        <p class="footnote">Choose a role to get started</p>
+      </section>
+    </div>
+  </main>
 </body>
 </html>

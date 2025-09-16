@@ -1,167 +1,166 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>Dyslexic-Friendly Reader</title>
+  <meta charset="UTF-8">
+  <title>Dyslexic-Friendly Reader – Udaan</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-  <link href="https://fonts.googleapis.com/css2?family=Lexend&display=swap" rel="stylesheet">
   <style>
-    body {
-      font-family: 'Lexend', Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #fffde7; 
-      color: #222;
-      line-height: 1.8;
-    }
-
-    .controls {
-      position: fixed;
-      top: 15px;
-      right: 15px;
-      background: #ffffffee;
-      padding: 15px 20px;
-      border-radius: 12px;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.15);
-      z-index: 1000;
-      font-size: 14px;
-    }
-
-    .controls label {
-      display: block;
-      margin-bottom: 10px;
-      font-weight: 600;
-      color: #333;
-    }
-
-    .controls input[type=range] {
-      width: 150px;
-    }
-
-    .controls button {
-      margin-top: 8px;
-      padding: 8px 12px;
-      font-size: 14px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: bold;
-      transition: 0.2s;
-    }
-
-    #ttsBtn {
-      background: #4CAF50;
-      color: white;
-    }
-    #ttsBtn:hover { background: #43a047; }
-
-    #stopBtn {
-      background: #e53935;
-      color: white;
-    }
-    #stopBtn:hover { background: #c62828; }
-
-    #reader {
-      margin: 120px auto 40px;
-      max-width: 900px;
-      padding: 25px;
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-      font-size: 18px;
-    }
-
-    .highlight {
-      background-color: #ffca28; 
-      border-radius: 4px;
-      padding: 2px 4px;
-    }
-
-    p {
-      margin-bottom: 1em;
-    }
+    /* Local enhancements specific to the reader */
+    .toolbar { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:16px; }
+    .toolbar label { font-weight:600; margin-right:6px; }
+    .toolbar .control-group { display:flex; align-items:center; gap:8px; padding:8px 10px; background: rgba(255,255,255,0.7); border-radius:10px; }
+    .reader-shell { position:relative; border-radius:16px; overflow:hidden; }
+    .overlay { position:absolute; inset:0; pointer-events:none; opacity:0.25; background:#e3f6ff; transition:background 0.2s, opacity 0.2s; }
+    .reader { position:relative; z-index:1; padding:28px; background:rgba(255,255,255,0.9); border-radius:16px; line-height:1.6; white-space:pre-wrap; }
+    .tts-controls { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
+    .badge-small { font-size: 0.85rem; padding: 2px 8px; border-radius: 8px; background: #eef6ff; color:#2563eb; }
   </style>
 </head>
 <body>
-  <div class="controls">
-    <label>Font Size: <input type="range" id="fontSize" min="14" max="32" value="18"></label>
-    <label>Line Height: <input type="range" id="lineHeight" min="1" max="3" step="0.1" value="1.8"></label>
-    <label>Speech Rate: <input type="range" id="speechRate" min="0.5" max="2" step="0.1" value="1"></label>
-    <label>Pitch: <input type="range" id="speechPitch" min="0.5" max="2" step="0.1" value="1"></label>
-    <button id="ttsBtn">🔊 Read Aloud</button>
-    <button id="stopBtn">⏹ Stop</button>
-  </div>
+  <section class="glass-panel fade-in dyslexic-mode" style="max-width:900px;margin:32px auto;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <h2 style="margin:0;">Accessible Reading</h2>
+      <a href="{{ url_for('student_dashboard') }}" class="badge">⬅ Back to Dashboard</a>
+    </div>
 
-  <div id="reader"></div>
+    <div class="toolbar" role="region" aria-label="Reading preferences">
+      <div class="control-group">
+        <label for="fontSelect">Font</label>
+        <select id="fontSelect" aria-label="Font" onchange="applyTypography()">
+          <option value="OpenDyslexic, Arial, sans-serif">OpenDyslexic</option>
+          <option value="Arial, sans-serif">Arial</option>
+          <option value="Verdana, sans-serif">Verdana</option>
+          <option value="'Segoe UI', Arial, sans-serif">Segoe UI</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label for="fontSize">Size</label>
+        <input id="fontSize" type="range" min="16" max="28" step="1" value="18" oninput="applyTypography()" aria-label="Font size">
+        <span id="fontSizeVal" class="badge-small">18px</span>
+      </div>
+      <div class="control-group">
+        <label for="lineHeight">Line</label>
+        <input id="lineHeight" type="range" min="1.2" max="2.5" step="0.1" value="1.6" oninput="applyTypography()" aria-label="Line spacing">
+        <span id="lineHeightVal" class="badge-small">1.6</span>
+      </div>
+      <div class="control-group">
+        <label for="wordSpacing">Word</label>
+        <input id="wordSpacing" type="range" min="0" max="0.6" step="0.05" value="0.2" oninput="applyTypography()" aria-label="Word spacing">
+        <span id="wordSpacingVal" class="badge-small">0.2em</span>
+      </div>
+      <div class="control-group">
+        <label for="letterSpacing">Letter</label>
+        <input id="letterSpacing" type="range" min="0" max="0.15" step="0.01" value="0.04" oninput="applyTypography()" aria-label="Letter spacing">
+        <span id="letterSpacingVal" class="badge-small">0.04em</span>
+      </div>
+      <div class="control-group">
+        <label for="overlayColor">Overlay</label>
+        <input id="overlayColor" type="color" value="#e3f6ff" onchange="applyOverlay()" aria-label="Color overlay">
+        <label for="overlayOpacity">Opacity</label>
+        <input id="overlayOpacity" type="range" min="0" max="0.6" step="0.05" value="0.25" oninput="applyOverlay()" aria-label="Overlay opacity">
+      </div>
+    </div>
 
-<script>
-const reader = document.getElementById('reader');
-const fontSizeSlider = document.getElementById('fontSize');
-const lineHeightSlider = document.getElementById('lineHeight');
-const ttsBtn = document.getElementById('ttsBtn');
-const stopBtn = document.getElementById('stopBtn');
-const speechRateSlider = document.getElementById('speechRate');
-const speechPitchSlider = document.getElementById('speechPitch');
+    <div class="reader-shell">
+      <div id="overlay" class="overlay" aria-hidden="true"></div>
+      <div id="readerContent" class="reader" tabindex="0">{{ text }}</div>
+    </div>
 
-// Get text from server
-const rawText = `{{ text|replace('\n', '\\n')|safe }}`;
+    <div class="tts-controls" role="region" aria-label="Text to speech controls">
+      <button class="button" onclick="ttsPlay()">▶ Play</button>
+      <button class="button" onclick="ttsPause()">⏸ Pause</button>
+      <button class="button" onclick="ttsStop()">⏹ Stop</button>
+      <span class="badge-small" id="ttsStatus" aria-live="polite">Ready</span>
+      <div class="control-group" style="margin-left:auto;">
+        <label for="ttsRate">Rate</label>
+        <input id="ttsRate" type="range" min="0.6" max="1.4" step="0.1" value="1" oninput="updateSpeechParams()">
+        <label for="ttsPitch">Pitch</label>
+        <input id="ttsPitch" type="range" min="0.6" max="1.4" step="0.1" value="1" oninput="updateSpeechParams()">
+      </div>
+    </div>
+  </section>
 
-// Split text into paragraphs
-const paragraphs = rawText.split(/\n+/);
+  <script>
+    const reader = document.getElementById('readerContent');
+    const overlay = document.getElementById('overlay');
 
-// Wrap each word in span inside <p>
-reader.innerHTML = paragraphs.map(para => {
-  const words = para.split(/\s+/).map(word => `<span>${word} </span>`).join('');
-  return `<p>${words}</p>`;
-}).join('');
+    function applyTypography(){
+      const font = document.getElementById('fontSelect').value;
+      const size = document.getElementById('fontSize').value;
+      const line = document.getElementById('lineHeight').value;
+      const word = document.getElementById('wordSpacing').value;
+      const letter = document.getElementById('letterSpacing').value;
 
-// Font and line height controls
-fontSizeSlider.addEventListener('input', () => { reader.style.fontSize = fontSizeSlider.value + 'px'; });
-lineHeightSlider.addEventListener('input', () => { reader.style.lineHeight = lineHeightSlider.value; });
+      reader.style.fontFamily = font;
+      reader.style.fontSize = size + 'px';
+      reader.style.lineHeight = line;
+      reader.style.wordSpacing = word + 'em';
+      reader.style.letterSpacing = letter + 'em';
 
-// Speech synthesis
-let utterance;
-let allSpans = Array.from(reader.querySelectorAll('span'));
-let wordsFlat = allSpans.map(s => s.textContent.trim());
+      document.getElementById('fontSizeVal').textContent = size + 'px';
+      document.getElementById('lineHeightVal').textContent = line;
+      document.getElementById('wordSpacingVal').textContent = word + 'em';
+      document.getElementById('letterSpacingVal').textContent = letter + 'em';
+    }
 
-function startReading(startIndex = 0) {
-  speechSynthesis.cancel();
-  Array.from(reader.querySelectorAll('span')).forEach(s => s.classList.remove('highlight'));
+    function applyOverlay(){
+      const color = document.getElementById('overlayColor').value;
+      const opacity = document.getElementById('overlayOpacity').value;
+      overlay.style.background = color;
+      overlay.style.opacity = opacity;
+    }
 
-  const textToSpeak = wordsFlat.slice(startIndex).join(' ');
+    // Initialize defaults
+    applyTypography();
+    applyOverlay();
 
-  utterance = new SpeechSynthesisUtterance(textToSpeak);
-  utterance.rate = parseFloat(speechRateSlider.value);
-  utterance.pitch = parseFloat(speechPitchSlider.value);
+    // ---------- TTS (Web Speech API) ----------
+    let utterance = null;
+    function getText(){ return reader.textContent || ''; }
 
-  let charCount = 0;
-  utterance.onboundary = (event) => {
-    if (event.name === 'word') {
-      let charsCounted = 0;
-      for (let i = startIndex; i < wordsFlat.length; i++) {
-        charsCounted += wordsFlat[i].length + 1;
-        if (charsCounted > event.charIndex) {
-          allSpans.forEach(s => s.classList.remove('highlight'));
-          allSpans[i].classList.add('highlight');
-          break;
+    function ensureUtterance(){
+      if(!utterance){ utterance = new SpeechSynthesisUtterance(getText()); }
+      utterance.text = getText();
+      utterance.rate = parseFloat(document.getElementById('ttsRate').value);
+      utterance.pitch = parseFloat(document.getElementById('ttsPitch').value);
+      utterance.onstart = () => setTtsStatus('Speaking');
+      utterance.onend = () => setTtsStatus('Finished');
+      utterance.onerror = () => setTtsStatus('Error');
+    }
+
+    function setTtsStatus(msg){
+      const el = document.getElementById('ttsStatus');
+      el.textContent = msg;
+    }
+
+    function ttsPlay(){
+      if(!('speechSynthesis' in window)){
+        setTtsStatus('TTS not supported');
+        return;
+      }
+      window.speechSynthesis.cancel();
+      ensureUtterance();
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function ttsPause(){
+      if(window.speechSynthesis.speaking){ window.speechSynthesis.pause(); setTtsStatus('Paused'); }
+    }
+
+    function ttsStop(){
+      if(window.speechSynthesis.speaking){ window.speechSynthesis.cancel(); setTtsStatus('Stopped'); }
+    }
+
+    function updateSpeechParams(){
+      if(utterance){
+        utterance.rate = parseFloat(document.getElementById('ttsRate').value);
+        utterance.pitch = parseFloat(document.getElementById('ttsPitch').value);
+        if(window.speechSynthesis.speaking && !window.speechSynthesis.paused){
+          window.speechSynthesis.cancel();
+          window.speechSynthesis.speak(utterance);
         }
       }
     }
-  };
-
-  utterance.onend = () => { allSpans.forEach(s => s.classList.remove('highlight')); };
-  speechSynthesis.speak(utterance);
-}
-
-// Click on a word to start reading from there
-allSpans.forEach((span, idx) => {
-  span.style.cursor = 'pointer';
-  span.addEventListener('click', () => { startReading(idx); });
-});
-
-// Buttons
-ttsBtn.addEventListener('click', () => { startReading(0); });
-stopBtn.addEventListener('click', () => { speechSynthesis.cancel(); allSpans.forEach(s => s.classList.remove('highlight')); });
-</script>
+  </script>
 </body>
 </html>

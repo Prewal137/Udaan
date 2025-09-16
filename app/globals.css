@@ -1,0 +1,263 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* Updated color palette to match educational platform design brief */
+  --background: #ffffff;
+  --foreground: #374151;
+  --card: #f0fdf4;
+  --card-foreground: #374151;
+  --popover: #ffffff;
+  --popover-foreground: #374151;
+  --primary: #15803d;
+  --primary-foreground: #ffffff;
+  --secondary: #84cc16;
+  --secondary-foreground: #374151;
+  --muted: #f0fdf4;
+  --muted-foreground: #6b7280;
+  --accent: #84cc16;
+  --accent-foreground: #ffffff;
+  --destructive: #d97706;
+  --destructive-foreground: #ffffff;
+  --border: #e5e7eb;
+  --input: #f0fdf4;
+  --ring: #84cc16;
+  --chart-1: #15803d;
+  --chart-2: #84cc16;
+  --chart-3: #d97706;
+  --chart-4: #6b7280;
+  --chart-5: #8b5cf6;
+  --radius: 0.5rem;
+  --sidebar: #f0fdf4;
+  --sidebar-foreground: #374151;
+  --sidebar-primary: #15803d;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #84cc16;
+  --sidebar-accent-foreground: #374151;
+  --sidebar-border: #e5e7eb;
+  --sidebar-ring: #84cc16;
+}
+
+.dark {
+  /* Updated dark mode colors for better accessibility */
+  --background: #0f172a;
+  --foreground: #f1f5f9;
+  --card: #1e293b;
+  --card-foreground: #f1f5f9;
+  --popover: #1e293b;
+  --popover-foreground: #f1f5f9;
+  --primary: #22c55e;
+  --primary-foreground: #0f172a;
+  --secondary: #94a3b8;
+  --secondary-foreground: #f1f5f9;
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8;
+  --accent: #22c55e;
+  --accent-foreground: #0f172a;
+  --destructive: #f97316;
+  --destructive-foreground: #f1f5f9;
+  --border: #334155;
+  --input: #1e293b;
+  --ring: #22c55e;
+  --chart-1: #22c55e;
+  --chart-2: #84cc16;
+  --chart-3: #f97316;
+  --chart-4: #94a3b8;
+  --chart-5: #a855f7;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Added custom animations for educational platform */
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 5px rgba(132, 204, 22, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(132, 204, 22, 0.6);
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Added accessibility-focused styles */
+.dyslexic-friendly {
+  font-family: "OpenDyslexic", "Comic Sans MS", cursive;
+  line-height: 1.8;
+  letter-spacing: 0.1em;
+  word-spacing: 0.2em;
+}
+
+.high-contrast {
+  filter: contrast(150%);
+}
+
+.large-text {
+  font-size: 1.25rem;
+  line-height: 1.6;
+}
+
+/* Enhanced accessibility styles for better user experience */
+.large-buttons button {
+  min-height: 48px;
+  min-width: 48px;
+  font-size: 1.1rem;
+}
+
+.large-buttons .btn-sm {
+  min-height: 40px;
+  min-width: 40px;
+}
+
+/* Focus indicators for keyboard navigation */
+*:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Skip to main content link */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  padding: 8px;
+  text-decoration: none;
+  border-radius: 4px;
+  z-index: 1000;
+}
+
+.skip-link:focus {
+  top: 6px;
+}
+
+/* Screen reader only content */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* High contrast mode adjustments */
+@media (prefers-contrast: high) {
+  :root {
+    --border: #000000;
+    --ring: #000000;
+  }
+
+  .dark {
+    --border: #ffffff;
+    --ring: #ffffff;
+  }
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  * {
+    background: white !important;
+    color: black !important;
+  }
+}
