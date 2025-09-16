@@ -158,12 +158,4 @@ python app.py
 
 ---
 
-## 🎨 Optional Enhancements
-- Add interactive charts on dashboards (Chart.js / Plotly)
-- Save dyslexic reader preferences on server-side
-- Add per-student downloadable progress reports (PDF)
-- Integrate more AI features: text simplification, question generation, etc.
 
----
-
-✅ This README includes badges, emojis, full sections (setup, usage, paths, troubleshooting, extending, notes, license), and a GitHub-friendly structure.
